@@ -4,6 +4,10 @@
 # Primary Author Source: https://github.com/Disassembler0/Win10-Initial-Setup-Script
 # Tweaked Source: https://gist.github.com/alirobe/7f3b34ad89a159e6daa1/
 #
+## Modified by Crapling
+## Additional Tweaks source: https://github.com/farag2/Windows-10-Setup-Script
+#
+#
 #    If you're a power user looking to tweak your machinea, or doing larger roll-out.. 
 #    Use the @Disassembler0 script instead. It'll probably be more up-to-date than mine:
 #    https://github.com/Disassembler0/Win10-Initial-Setup-Script
@@ -23,233 +27,260 @@
 #	- Added Install Programs
 #	- Added Debloat Microsoft Store Apps
 #
+#   Crapling Additions:
+#   
+#   - Change default location of Program Files, Program Files (x86) and Temp 
+#   
+#
 ##########
+
 # Default preset
 $tweaks = @(
-	### Require administrator privileges ###
-	"RequireAdmin",
-	"CreateRestorePoint",
-	
-	### provide the Option to change default installation drive (for example when using a small ssd as system drive) ###
-	
-	
-	
-	### External Program Setup
-	"InstallTitusProgs", #REQUIRED FOR OTHER PROGRAM INSTALLS!
-	"Install7Zip",
-	"InstallNotepadplusplus",
-	## Modified by Crapling
-	"InstallAdobe",
-	"InstallJava",
-	
+    ### Require administrator privileges ###
+    "RequireAdmin",
+    "CreateRestorePoint",
 
-	### Windows Apps
-	"DebloatAll",
+    #### Modification by Crapling
+    ### backup registry
+    "BackupRegistry",
 
-	### Privacy Tweaks ###
-	"DisableTelemetry",             # "EnableTelemetry",
-	"DisableWiFiSense",             # "EnableWiFiSense",
-	"DisableSmartScreen",         # "EnableSmartScreen",
-	"DisableWebSearch",             # "EnableWebSearch",
-	"DisableAppSuggestions",        # "EnableAppSuggestions",
-	"DisableActivityHistory",       # "EnableActivityHistory",
-	"DisableBackgroundApps",        # "EnableBackgroundApps",
-	"DisableLocationTracking",      # "EnableLocationTracking",
-	"DisableMapUpdates",            # "EnableMapUpdates",
-	"DisableFeedback",              # "EnableFeedback",
-	"DisableTailoredExperiences",   # "EnableTailoredExperiences",
-	"DisableAdvertisingID",         # "EnableAdvertisingID",
-	"DisableCortana",               # "EnableCortana",
-	"DisableErrorReporting",        # "EnableErrorReporting",
-	"SetP2PUpdateLocal",          # "SetP2PUpdateInternet",
-	"DisableDiagTrack",             # "EnableDiagTrack",
-	"DisableWAPPush",               # "EnableWAPPush",
+    ### provide the Option to change default installation drive (for example when using a small ssd as system drive) ###
+    #############
+    # !WARNING!
+    #############
+    # changing Folders default location can result in strange results (especically the Program Files Folders), do this at your own risk
+    "ChangeDefaultUserLibraryDrive",
+    "ChangeProgramInstallDrive",
+    "ChangeTempFolderDrive",
+    #############
+    # END_WARNING
+    #############
 
-	### Security Tweaks ###
-	## Modification by Crapling
-	"SetUACHigh", 					#"SetUACLow",
-	##
-	# "EnableSharingMappedDrives",  # "DisableSharingMappedDrives",
-	# "DisableAdminShares",           # "EnableAdminShares",
-	"DisableSMB1",                # "EnableSMB1",
-	# "DisableSMBServer",           # "EnableSMBServer",
-	# "DisableLLMNR",               # "EnableLLMNR",
-	"SetCurrentNetworkPrivate",     # "SetCurrentNetworkPublic",
-	"SetUnknownNetworksPrivate",  # "SetUnknownNetworksPublic",
-	"DisableNetDevicesAutoInst",  # "EnableNetDevicesAutoInst",
-	"DisableCtrldFolderAccess",	# "EnableCtrldFolderAccess",
-	"EnableFirewall",
-	"EnableDefender",
-	"EnableDefenderCloud",
-	## Modification by Crapling
-	#"EnableF8BootMenu",             # "DisableF8BootMenu",
-	##
-	#"SetDEPOptOut",                 # "SetDEPOptIn",
-	# "EnableCIMemoryIntegrity",    # "DisableCIMemoryIntegrity",
-	#"DisableScriptHost",            # "EnableScriptHost",
-	#"EnableDotNetStrongCrypto",     # "DisableDotNetStrongCrypto",
-	"EnableMeltdownCompatFlag", 	# "DisableMeltdownCompatFlag",      
+    ### other tweaks
+    "RememberOnExplorerRestart",
+    "EnableRegistryBackup",
+    "PinControlPanelToStart",
+    ####
 
-	### Service Tweaks ###
-	## Modified by Crapling
-	# "DisableUpdateMSRT",          # "EnableUpdateMSRT",
-	# "DisableUpdateDriver",        # "EnableUpdateDriver",
-	##
-	"DisableUpdateRestart",         # "EnableUpdateRestart",
-	"DisableHomeGroups",          # "EnableHomeGroups",
-	"DisableSharedExperiences",     # "EnableSharedExperiences",
-	"DisableRemoteAssistance",      # "EnableRemoteAssistance",
-	"EnableRemoteDesktop",          # "DisableRemoteDesktop",
-	"DisableAutoplay",              # "EnableAutoplay",
-	"DisableAutorun",               # "EnableAutorun",
-	"DisableStorageSense",        # "EnableStorageSense",
-	"DisableDefragmentation",     # "EnableDefragmentation",
-	"DisableSuperfetch",          # "EnableSuperfetch",
-	"EnableIndexing",
-	"SetBIOSTimeUTC",             # "SetBIOSTimeLocal",
-	"DisableHibernation",		# "EnableHibernation",
-	## Modified by Crapling 
-	"DisableSleepButton",		  # "EnableSleepButton",         
-	##
-	"DisableSleepTimeout",        # "EnableSleepTimeout",
-	"DisableFastStartup",         # "EnableFastStartup",
-	## Modified by Crapling
-	"SetCurrentNetworkPrivate",   # "SetCurrentNetworkPublic",
-	"DisableUpdateMSProducts",	  # "EnableUpdateMSProducts",
-	"EnableClipboardHistory",	  # "DisableClipboardHistory",
-	"DisableAutoRebootOnCrash",	  # "EnableAutoRebootOnCrash",
-	##
-	
-	### UI Tweaks ###
-	"DisableActionCenter",          # "EnableActionCenter",
-	"DisableLockScreen",            # "EnableLockScreen",
-	"DisableLockScreenRS1",       # "EnableLockScreenRS1",
-	# "HideNetworkFromLockScreen",    # "ShowNetworkOnLockScreen",
-	# "HideShutdownFromLockScreen",   # "ShowShutdownOnLockScreen",
-	"DisableStickyKeys",            # "EnableStickyKeys",
-	"ShowTaskManagerDetails"        # "HideTaskManagerDetails",
-	"ShowFileOperationsDetails",    # "HideFileOperationsDetails",
-	"DisableFileDeleteConfirm",	# "EnableFileDeleteConfirm",    
-	#"HideTaskbarSearch",
-	"ShowTaskbarSearchIcon",      # "ShowTaskbarSearchBox",
-	"HideTaskView",                 # "ShowTaskView",
-	# "ShowSmallTaskbarIcons",        # "ShowLargeTaskbarIcons",
-	## Modified by Crapling
-	"SetTaskbarCombineAlways",		# "SetTaskbarCombineWhenFull",    # "SetTaskbarCombineNever",     
-	"HideTaskbarPeopleIcon",        # "ShowTaskbarPeopleIcon",
-	"HideTrayIcons",				#"ShowTrayIcons",
-	##
-	"DisableSearchAppInStore",      # "EnableSearchAppInStore",
-	## Modified by Crapling
-	# "DisableNewAppPrompt",          # "EnableNewAppPrompt",
-	##
-	# "SetControlPanelSmallIcons",  # "SetControlPanelLargeIcons",  # "SetControlPanelCategories",
-	# "SetVisualFXPerformance",     # "SetVisualFXAppearance",
-	# "AddENKeyboard",              # "RemoveENKeyboard",
-	"EnableNumlock",             	# "DisableNumlock",
-	"EnableDarkMode",				# "DisableDarkMode",
-	"Stop-EdgePDF",
-	## Modified by Crapling
-	"HideDefenderTrayIcon",			# "ShowDefenderTrayIcon",
-	"HideRecentlyAddedApps",		# "ShowRecentlyAddedApps",
-	"HideMostUsedApps", 			# "ShowMostUsedApps",
-	"SetWinXMenuPowerShell",		# "SetWinXMenuCmd",
-	"DisableShortcutInName",		# "EnableShortcutInName",
-	"HideShortcutArrow",			# "ShowShortcutArrow",
-	"DisableEnhPointerPrecision",   # "EnableEnhPointerPrecision",
-	"EnableVerboseStatus",			# "DisableVerboseStatus",
-	"DisableF1HelpKey",				# "EnableF1HelpKey",
-	##
 
-	### Explorer UI Tweaks ###
-	"ShowKnownExtensions",          # "HideKnownExtensions",
-	## Modified by Crapling
-	"ShowHiddenFiles",				# "HideHiddenFiles",
-	##
-	"HideSyncNotifications"         # "ShowSyncNotifications",
-	"HideRecentShortcuts",          # "ShowRecentShortcuts",
-	## Modified by Crapling
-	# "SetExplorerThisPC",            # "SetExplorerQuickAccess",
-	##
-	"HideThisPCFromDesktop",	# "ShowThisPCOnDesktop",
-	# "ShowUserFolderOnDesktop",    # "HideUserFolderFromDesktop",
-	# "HideDesktopFromThisPC",        # "ShowDesktopInThisPC",
-	# "HideDesktopFromExplorer",    # "ShowDesktopInExplorer",
-	# "HideDocumentsFromThisPC",      # "ShowDocumentsInThisPC",
-	# "HideDocumentsFromExplorer",  # "ShowDocumentsInExplorer",
-	# "HideDownloadsFromThisPC",      # "ShowDownloadsInThisPC",
-	# "HideDownloadsFromExplorer",  # "ShowDownloadsInExplorer",
-	## Modified by Crapling
-	# "HideMusicFromThisPC",          # "ShowMusicInThisPC",
-	# "HideMusicFromExplorer",      # "ShowMusicInExplorer",
-	##
-	# "HidePicturesFromThisPC",       # "ShowPicturesInThisPC",
-	# "HidePicturesFromExplorer",   # "ShowPicturesInExplorer",
-	## Modified by Crapling
-	"HideVideosFromThisPC",         # "ShowVideosInThisPC",
-	"HideVideosFromExplorer",     # "ShowVideosInExplorer",
-	##
-	"Hide3DObjectsFromThisPC",      # "Show3DObjectsInThisPC",
-	"Hide3DObjectsFromExplorer",  # "Show3DObjectsInExplorer",
-	# "DisableThumbnails",          # "EnableThumbnails",
-	# "DisableThumbsDB",              # "EnableThumbsDB",
-	## Modified by Crapling
-	"ShowSelectCheckboxes", 	  # "HideSelectCheckboxes",
-	"HideIncludeInLibraryMenu",   # "ShowIncludeInLibraryMenu",
-	"HideGiveAccessToMenu", 	  # "ShowGiveAccessToMenu",
-	"HideShareMenu",			  # "ShowShareMenu",
-	##
 
-	### Application Tweaks ###
-	## Modified by Crapling
-	"DisableOneDrive",				# "EnableOneDrive",
-	"UninstallOneDrive",			# "InstallOneDrive",
-	##
-	"UninstallMsftBloat",           # "InstallMsftBloat",
-	"UninstallThirdPartyBloat",     # "InstallThirdPartyBloat",
-	# "UninstallWindowsStore",      # "InstallWindowsStore",
-	## Modified by Crapling
-	"DisableXboxFeatures",          # "EnableXboxFeatures",
-	##
-	"DisableAdobeFlash",            # "EnableAdobeFlash",
-	"InstallMediaPlayer", 		# "UninstallMediaPlayer",
-	"UninstallInternetExplorer",  # "InstallInternetExplorer",
-	"UninstallWorkFolders",       # "InstallWorkFolders",
-	"InstallLinuxSubsystem",      # "UninstallLinuxSubsystem",
-	# "InstallHyperV",              # "UninstallHyperV",
-	"SetPhotoViewerAssociation",    # "UnsetPhotoViewerAssociation",
-	"AddPhotoViewerOpenWith",       # "RemovePhotoViewerOpenWith",
-	"InstallPDFPrinter"		# "UninstallPDFPrinter",
-	# "UninstallXPSPrinter",          # "InstallXPSPrinter",
-	# "RemoveFaxPrinter",             # "AddFaxPrinter",
-	## Modified by Crapling
-	"DisableEdgeDesktopShortcutCreation", # "EnableEdgeShortcutCreation",
-	"DisableMediaSharing",				# "EnableMediaSharing",
-	"UninstallHelloFace",			# "InstallHelloFace",
-	"InstallNET23",					# "UninstallNET23",
-	##
-	
+    ### External Program Setup
+    "InstallTitusProgs", #REQUIRED FOR OTHER PROGRAM INSTALLS!
+    "Install7Zip",
+    "InstallNotepadplusplus",
+    ## Modified by Crapling
+    "InstallAdobe",
+    "InstallJava",
+    ##
 
-	### Server Specific Tweaks ###
-	# "HideServerManagerOnLogin",   # "ShowServerManagerOnLogin",
-	# "DisableShutdownTracker",     # "EnableShutdownTracker",
-	# "DisablePasswordPolicy",      # "EnablePasswordPolicy",
-	# "DisableCtrlAltDelLogin",     # "EnableCtrlAltDelLogin",
-	# "DisableIEEnhancedSecurity",  # "EnableIEEnhancedSecurity",
-	# "EnableAudio",                # "DisableAudio",
+    ### Windows Apps
+    "DebloatAll",
 
-	### Unpinning ###
-	## Modified by Crapling
-	"UnpinStartMenuTiles",
-	"UnpinTaskbarIcons",
-	##
+    ### Privacy Tweaks ###
+    "DisableTelemetry",             # "EnableTelemetry",
+    "DisableWiFiSense",             # "EnableWiFiSense",
+    "DisableSmartScreen",         # "EnableSmartScreen",
+    "DisableWebSearch",             # "EnableWebSearch",
+    "DisableAppSuggestions",        # "EnableAppSuggestions",
+    "DisableActivityHistory",       # "EnableActivityHistory",
+    "DisableBackgroundApps",        # "EnableBackgroundApps",
+    "DisableLocationTracking",      # "EnableLocationTracking",
+    "DisableMapUpdates",            # "EnableMapUpdates",
+    "DisableFeedback",              # "EnableFeedback",
+    "DisableTailoredExperiences",   # "EnableTailoredExperiences",
+    "DisableAdvertisingID",         # "EnableAdvertisingID",
+    "DisableCortana",               # "EnableCortana",
+    "DisableErrorReporting",        # "EnableErrorReporting",
+    "SetP2PUpdateLocal",          # "SetP2PUpdateInternet",
+    "DisableDiagTrack",             # "EnableDiagTrack",
+    "DisableWAPPush",               # "EnableWAPPush",
 
-	### Auxiliary Functions ###
-	## Modified by Crapling
-	"WaitForKey"
-	"Restart"
-	##
+    ### Security Tweaks ###
+    ## Modification by Crapling
+    "SetUACHigh", 					#"SetUACLow",
+    ##
+    # "EnableSharingMappedDrives",  # "DisableSharingMappedDrives",
+    # "DisableAdminShares",           # "EnableAdminShares",
+    "DisableSMB1",                # "EnableSMB1",
+    # "DisableSMBServer",           # "EnableSMBServer",
+    # "DisableLLMNR",               # "EnableLLMNR",
+    "SetCurrentNetworkPrivate",     # "SetCurrentNetworkPublic",
+    "SetUnknownNetworksPrivate",  # "SetUnknownNetworksPublic",
+    "DisableNetDevicesAutoInst",  # "EnableNetDevicesAutoInst",
+    "DisableCtrldFolderAccess",	# "EnableCtrldFolderAccess",
+    "EnableFirewall",
+    "EnableDefender",
+    "EnableDefenderCloud",
+    ## Modification by Crapling
+    #"EnableF8BootMenu",             # "DisableF8BootMenu",
+    ##
+    #"SetDEPOptOut",                 # "SetDEPOptIn",
+    # "EnableCIMemoryIntegrity",    # "DisableCIMemoryIntegrity",
+    #"DisableScriptHost",            # "EnableScriptHost",
+    #"EnableDotNetStrongCrypto",     # "DisableDotNetStrongCrypto",
+    "EnableMeltdownCompatFlag", 	# "DisableMeltdownCompatFlag",      
+
+    ### Service Tweaks ###
+    ## Modified by Crapling
+    # "DisableUpdateMSRT",          # "EnableUpdateMSRT",
+    # "DisableUpdateDriver",        # "EnableUpdateDriver",
+    ##
+    "DisableUpdateRestart",         # "EnableUpdateRestart",
+    "DisableHomeGroups",          # "EnableHomeGroups",
+    "DisableSharedExperiences",     # "EnableSharedExperiences",
+    "DisableRemoteAssistance",      # "EnableRemoteAssistance",
+    "EnableRemoteDesktop",          # "DisableRemoteDesktop",
+    "DisableAutoplay",              # "EnableAutoplay",
+    "DisableAutorun",               # "EnableAutorun",
+    "DisableStorageSense",        # "EnableStorageSense",
+    "DisableDefragmentation",     # "EnableDefragmentation",
+    "DisableSuperfetch",          # "EnableSuperfetch",
+    "EnableIndexing",
+    "SetBIOSTimeUTC",             # "SetBIOSTimeLocal",
+    "DisableHibernation",		# "EnableHibernation",
+    ## Modified by Crapling 
+    "DisableSleepButton",		  # "EnableSleepButton",         
+    ##
+    "DisableSleepTimeout",        # "EnableSleepTimeout",
+    "DisableFastStartup",         # "EnableFastStartup",
+    ## Modified by Crapling
+    "SetCurrentNetworkPrivate",   # "SetCurrentNetworkPublic",
+    "DisableUpdateMSProducts",	  # "EnableUpdateMSProducts",
+    "EnableClipboardHistory",	  # "DisableClipboardHistory",
+    "DisableAutoRebootOnCrash",	  # "EnableAutoRebootOnCrash",
+    ##
+
+    ### UI Tweaks ###
+    "DisableActionCenter",          # "EnableActionCenter",
+    "DisableLockScreen",            # "EnableLockScreen",
+    "DisableLockScreenRS1",       # "EnableLockScreenRS1",
+    # "HideNetworkFromLockScreen",    # "ShowNetworkOnLockScreen",
+    # "HideShutdownFromLockScreen",   # "ShowShutdownOnLockScreen",
+    "DisableStickyKeys",            # "EnableStickyKeys",
+    "ShowTaskManagerDetails"        # "HideTaskManagerDetails",
+    "ShowFileOperationsDetails",    # "HideFileOperationsDetails",
+    "DisableFileDeleteConfirm",	# "EnableFileDeleteConfirm",    
+    #"HideTaskbarSearch",
+    "ShowTaskbarSearchIcon",      # "ShowTaskbarSearchBox",
+    "HideTaskView",                 # "ShowTaskView",
+    # "ShowSmallTaskbarIcons",        # "ShowLargeTaskbarIcons",
+    ## Modified by Crapling
+    "SetTaskbarCombineAlways",		# "SetTaskbarCombineWhenFull",    # "SetTaskbarCombineNever",     
+    "HideTaskbarPeopleIcon",        # "ShowTaskbarPeopleIcon",
+    "HideTrayIcons",				#"ShowTrayIcons",
+    ##
+    "DisableSearchAppInStore",      # "EnableSearchAppInStore",
+    ## Modified by Crapling
+    # "DisableNewAppPrompt",          # "EnableNewAppPrompt",
+    ##
+    # "SetControlPanelSmallIcons",  # "SetControlPanelLargeIcons",  # "SetControlPanelCategories",
+    # "SetVisualFXPerformance",     # "SetVisualFXAppearance",
+    # "AddENKeyboard",              # "RemoveENKeyboard",
+    "EnableNumlock",             	# "DisableNumlock",
+    "EnableDarkMode",				# "DisableDarkMode",
+    "Stop-EdgePDF",
+    ## Modified by Crapling
+    "HideDefenderTrayIcon",			# "ShowDefenderTrayIcon",
+    "HideRecentlyAddedApps",		# "ShowRecentlyAddedApps",
+    "HideMostUsedApps", 			# "ShowMostUsedApps",
+    "SetWinXMenuPowerShell",		# "SetWinXMenuCmd",
+    "DisableShortcutInName",		# "EnableShortcutInName",
+    "HideShortcutArrow",			# "ShowShortcutArrow",
+    "DisableEnhPointerPrecision",   # "EnableEnhPointerPrecision",
+    "EnableVerboseStatus",			# "DisableVerboseStatus",
+    "DisableF1HelpKey",				# "EnableF1HelpKey",
+    ##
+
+    ### Explorer UI Tweaks ###
+    "ShowKnownExtensions",          # "HideKnownExtensions",
+    ## Modified by Crapling
+    "ShowHiddenFiles",				# "HideHiddenFiles",
+    ##
+    "HideSyncNotifications"         # "ShowSyncNotifications",
+    "HideRecentShortcuts",          # "ShowRecentShortcuts",
+    ## Modified by Crapling
+    # "SetExplorerThisPC",            # "SetExplorerQuickAccess",
+    ##
+    "HideThisPCFromDesktop",	# "ShowThisPCOnDesktop",
+    # "ShowUserFolderOnDesktop",    # "HideUserFolderFromDesktop",
+    # "HideDesktopFromThisPC",        # "ShowDesktopInThisPC",
+    # "HideDesktopFromExplorer",    # "ShowDesktopInExplorer",
+    # "HideDocumentsFromThisPC",      # "ShowDocumentsInThisPC",
+    # "HideDocumentsFromExplorer",  # "ShowDocumentsInExplorer",
+    # "HideDownloadsFromThisPC",      # "ShowDownloadsInThisPC",
+    # "HideDownloadsFromExplorer",  # "ShowDownloadsInExplorer",
+    ## Modified by Crapling
+    # "HideMusicFromThisPC",          # "ShowMusicInThisPC",
+    # "HideMusicFromExplorer",      # "ShowMusicInExplorer",
+    ##
+    # "HidePicturesFromThisPC",       # "ShowPicturesInThisPC",
+    # "HidePicturesFromExplorer",   # "ShowPicturesInExplorer",
+    ## Modified by Crapling
+    "HideVideosFromThisPC",         # "ShowVideosInThisPC",
+    "HideVideosFromExplorer",     # "ShowVideosInExplorer",
+    ##
+    "Hide3DObjectsFromThisPC",      # "Show3DObjectsInThisPC",
+    "Hide3DObjectsFromExplorer",  # "Show3DObjectsInExplorer",
+    # "DisableThumbnails",          # "EnableThumbnails",
+    # "DisableThumbsDB",              # "EnableThumbsDB",
+    ## Modified by Crapling
+    "ShowSelectCheckboxes", 	  # "HideSelectCheckboxes",
+    "HideIncludeInLibraryMenu",   # "ShowIncludeInLibraryMenu",
+    "HideGiveAccessToMenu", 	  # "ShowGiveAccessToMenu",
+    "HideShareMenu",			  # "ShowShareMenu",
+    ##
+
+    ### Application Tweaks ###
+    ## Modified by Crapling
+    "DisableOneDrive",				# "EnableOneDrive",
+    "UninstallOneDrive",			# "InstallOneDrive",
+    ##
+    "UninstallMsftBloat",           # "InstallMsftBloat",
+    "UninstallThirdPartyBloat",     # "InstallThirdPartyBloat",
+    # "UninstallWindowsStore",      # "InstallWindowsStore",
+    ## Modified by Crapling
+    "DisableXboxFeatures",          # "EnableXboxFeatures",
+    ##
+    "DisableAdobeFlash",            # "EnableAdobeFlash",
+    "InstallMediaPlayer", 		# "UninstallMediaPlayer",
+    "UninstallInternetExplorer",  # "InstallInternetExplorer",
+    "UninstallWorkFolders",       # "InstallWorkFolders",
+    "InstallLinuxSubsystem",      # "UninstallLinuxSubsystem",
+    # "InstallHyperV",              # "UninstallHyperV",
+    "SetPhotoViewerAssociation",    # "UnsetPhotoViewerAssociation",
+    "AddPhotoViewerOpenWith",       # "RemovePhotoViewerOpenWith",
+    "InstallPDFPrinter"		# "UninstallPDFPrinter",
+    # "UninstallXPSPrinter",          # "InstallXPSPrinter",
+    # "RemoveFaxPrinter",             # "AddFaxPrinter",
+    ## Modified by Crapling
+    "DisableEdgeDesktopShortcutCreation", # "EnableEdgeShortcutCreation",
+    "DisableMediaSharing",				# "EnableMediaSharing",
+    "UninstallHelloFace",			# "InstallHelloFace",
+    "InstallNET23",					# "UninstallNET23",
+    ##
+
+
+    ### Server Specific Tweaks ###
+    # "HideServerManagerOnLogin",   # "ShowServerManagerOnLogin",
+    # "DisableShutdownTracker",     # "EnableShutdownTracker",
+    # "DisablePasswordPolicy",      # "EnablePasswordPolicy",
+    # "DisableCtrlAltDelLogin",     # "EnableCtrlAltDelLogin",
+    # "DisableIEEnhancedSecurity",  # "EnableIEEnhancedSecurity",
+    # "EnableAudio",                # "DisableAudio",
+
+    ### Unpinning ###
+    ## Modified by Crapling
+    "UnpinStartMenuTiles",
+    "UnpinTaskbarIcons",
+    ##
+
+    ### Auxiliary Functions ###
+    ## Modified by Crapling
+    "WaitForKey"
+    "Restart"
+    ##
 )
+
 #########
 # Recommended Titus Programs
 #########
@@ -797,7 +828,7 @@ Function DisableDefender {
 	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableAntiSpyware" -Type DWord -Value 1
 	If ([System.Environment]::OSVersion.Version.Build -eq 14393) {
 		Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "WindowsDefender" -ErrorAction SilentlyContinue
-	} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 15063) {
+		} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 15063) {
 		Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "SecurityHealth" -ErrorAction SilentlyContinue
 	}
 }
@@ -808,7 +839,7 @@ Function EnableDefender {
 	Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableAntiSpyware" -ErrorAction SilentlyContinue
 	If ([System.Environment]::OSVersion.Version.Build -eq 14393) {
 		Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "WindowsDefender" -Type ExpandString -Value "`"%ProgramFiles%\Windows Defender\MSASCuiL.exe`""
-	} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 15063) {
+		} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 15063) {
 		Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "SecurityHealth" -Type ExpandString -Value "`"%ProgramFiles%\Windows Defender\MSASCuiL.exe`""
 	}
 }
@@ -1615,7 +1646,7 @@ Function HideDefenderTrayIcon {
 	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray" -Name "HideSystray" -Type DWord -Value 1
 	If ([System.Environment]::OSVersion.Version.Build -eq 14393) {
 		Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "WindowsDefender" -ErrorAction SilentlyContinue
-	} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 15063) {
+		} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 15063) {
 		Remove-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "SecurityHealth" -ErrorAction SilentlyContinue
 	}
 }
@@ -1626,9 +1657,9 @@ Function ShowDefenderTrayIcon {
 	Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender Security Center\Systray" -Name "HideSystray" -ErrorAction SilentlyContinue
 	If ([System.Environment]::OSVersion.Version.Build -eq 14393) {
 		Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "WindowsDefender" -Type ExpandString -Value "`"%ProgramFiles%\Windows Defender\MSASCuiL.exe`""
-	} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 15063 -And [System.Environment]::OSVersion.Version.Build -le 17134) {
+		} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 15063 -And [System.Environment]::OSVersion.Version.Build -le 17134) {
 		Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "SecurityHealth" -Type ExpandString -Value "%ProgramFiles%\Windows Defender\MSASCuiL.exe"
-	} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 17763) {
+		} ElseIf ([System.Environment]::OSVersion.Version.Build -ge 17763) {
 		Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name "SecurityHealth" -Type ExpandString -Value "%windir%\system32\SecurityHealthSystray.exe"
 	}
 }
@@ -1668,7 +1699,7 @@ Function SetWinXMenuPowerShell {
 	Write-Output "Setting PowerShell instead of Command prompt in WinX menu..."
 	If ([System.Environment]::OSVersion.Version.Build -le 14393) {
 		Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "DontUsePowerShellOnWinX" -Type DWord -Value 0
-	} Else {
+		} Else {
 		Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "DontUsePowerShellOnWinX" -ErrorAction SilentlyContinue
 	}
 }
@@ -1678,7 +1709,7 @@ Function SetWinXMenuCmd {
 	Write-Output "Setting Command prompt instead of PowerShell in WinX menu..."
 	If ([System.Environment]::OSVersion.Version.Build -le 14393) {
 		Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "DontUsePowerShellOnWinX" -ErrorAction SilentlyContinue
-	} Else {
+		} Else {
 		Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "DontUsePowerShellOnWinX" -Type DWord -Value 1
 	}
 }
@@ -1731,7 +1762,7 @@ Function EnableVerboseStatus {
 	Write-Output "Enabling verbose startup/shutdown status messages..."
 	If ((Get-CimInstance -Class "Win32_OperatingSystem").ProductType -eq 1) {
 		Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "VerboseStatus" -Type DWord -Value 1
-	} Else {
+		} Else {
 		Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "VerboseStatus" -ErrorAction SilentlyContinue
 	}
 }
@@ -1741,7 +1772,7 @@ Function DisableVerboseStatus {
 	Write-Output "Disabling verbose startup/shutdown status messages..."
 	If ((Get-CimInstance -Class "Win32_OperatingSystem").ProductType -eq 1) {
 		Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "VerboseStatus" -ErrorAction SilentlyContinue
-	} Else {
+		} Else {
 		Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System" -Name "VerboseStatus" -Type DWord -Value 0
 	}
 }
@@ -2162,7 +2193,7 @@ Function HideGiveAccessToMenu {
 	Remove-Item -Path "HKCR:\Directory\Background\shellex\ContextMenuHandlers\Sharing" -ErrorAction SilentlyContinue
 	Remove-Item -Path "HKCR:\Directory\shellex\ContextMenuHandlers\Sharing" -ErrorAction SilentlyContinue
 	Remove-Item -Path "HKCR:\Drive\shellex\ContextMenuHandlers\Sharing" -ErrorAction SilentlyContinue
-
+	
 }
 
 # Show 'Give access to' (until 1703 'Share With') context menu item.
@@ -2580,7 +2611,7 @@ Function InstallHyperV {
 	Write-Output "Installing Hyper-V..."
 	If ((Get-WmiObject -Class "Win32_OperatingSystem").Caption -like "*Server*") {
 		Install-WindowsFeature -Name "Hyper-V" -IncludeManagementTools -WarningAction SilentlyContinue | Out-Null
-	} Else {
+		} Else {
 		Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null
 	}
 }
@@ -2590,7 +2621,7 @@ Function UninstallHyperV {
 	Write-Output "Uninstalling Hyper-V..."
 	If ((Get-WmiObject -Class "Win32_OperatingSystem").Caption -like "*Server*") {
 		Uninstall-WindowsFeature -Name "Hyper-V" -IncludeManagementTools -WarningAction SilentlyContinue | Out-Null
-	} Else {
+		} Else {
 		Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null
 	}
 }
@@ -2726,7 +2757,7 @@ Function InstallNET23 {
 	Write-Output "Installing .NET Framework 2.0, 3.0 and 3.5 runtimes..."
 	If ((Get-CimInstance -Class "Win32_OperatingSystem").ProductType -eq 1) {
 		Get-WindowsOptionalFeature -Online | Where-Object { $_.FeatureName -eq "NetFx3" } | Enable-WindowsOptionalFeature -Online -NoRestart -WarningAction SilentlyContinue | Out-Null
-	} Else {
+		} Else {
 		Install-WindowsFeature -Name "NET-Framework-Core" -WarningAction SilentlyContinue | Out-Null
 	}
 }
@@ -2736,7 +2767,7 @@ Function UninstallNET23 {
 	Write-Output "Uninstalling .NET Framework 2.0, 3.0 and 3.5 runtimes..."
 	If ((Get-CimInstance -Class "Win32_OperatingSystem").ProductType -eq 1) {
 		Get-WindowsOptionalFeature -Online | Where-Object { $_.FeatureName -eq "NetFx3" } | Disable-WindowsOptionalFeature -Online -NoRestart -WarningAction SilentlyContinue | Out-Null
-	} Else {
+		} Else {
 		Uninstall-WindowsFeature -Name "NET-Framework-Core" -WarningAction SilentlyContinue | Out-Null
 	}
 }
@@ -2853,7 +2884,7 @@ Function UnpinStartMenuTiles {
 			$data = $data.Substring(0, $data.IndexOf(",0,202,30") + 9) + ",0,202,80,0,0"
 			Set-ItemProperty -Path "$($_.PsPath)\Current" -Name "Data" -Type Binary -Value $data.Split(",")
 		}
-	} ElseIf ([System.Environment]::OSVersion.Version.Build -eq 17133) {
+		} ElseIf ([System.Environment]::OSVersion.Version.Build -eq 17133) {
 		$key = Get-ChildItem -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount" -Recurse | Where-Object { $_ -like "*start.tilegrid`$windows.data.curatedtilecollection.tilecollection\Current" }
 		$data = (Get-ItemProperty -Path $key.PSPath -Name "Data").Data[0..25] + ([byte[]](202,50,0,226,44,1,1,0,0))
 		Set-ItemProperty -Path $key.PSPath -Name "Data" -Type Binary -Value $data
@@ -2898,7 +2929,7 @@ Function Restart {
 ###########
 
 Function EnableDarkMode {
-  Write-Output "Enabling Dark Mode"
+	Write-Output "Enabling Dark Mode"
 	Set-ItemProperty -Path HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Themes\Personalize -Name AppsUseLightTheme -Value 0
 }
 
@@ -2920,99 +2951,99 @@ Function Stop-EdgePDF {
     $NoWithList = "HKCR:\.pdf\OpenWithList" 
     If (!(Get-ItemProperty $NoPDF  NoOpenWith)) {
         New-ItemProperty $NoPDF NoOpenWith 
-    }        
+	}        
     If (!(Get-ItemProperty $NoPDF  NoStaticDefaultVerb)) {
         New-ItemProperty $NoPDF  NoStaticDefaultVerb 
-    }        
+	}        
     If (!(Get-ItemProperty $NoProgids  NoOpenWith)) {
         New-ItemProperty $NoProgids  NoOpenWith 
-    }        
+	}        
     If (!(Get-ItemProperty $NoProgids  NoStaticDefaultVerb)) {
         New-ItemProperty $NoProgids  NoStaticDefaultVerb 
-    }        
+	}        
     If (!(Get-ItemProperty $NoWithList  NoOpenWith)) {
         New-ItemProperty $NoWithList  NoOpenWith
-    }        
+	}        
     If (!(Get-ItemProperty $NoWithList  NoStaticDefaultVerb)) {
         New-ItemProperty $NoWithList  NoStaticDefaultVerb 
-    }
-            
+	}
+	
     #Appends an underscore '_' to the Registry key for Edge
     $Edge = "HKCR:\AppXd4nrz8ff68srnhf9t5a8sbjyar1cr723_"
     If (Test-Path $Edge) {
         Set-Item $Edge AppXd4nrz8ff68srnhf9t5a8sbjyar1cr723_ 
-    }
+	}
 }
 
 Function CreateRestorePoint {
-  Write-Output "Creating Restore Point incase something bad happens"
-  Enable-ComputerRestore -Drive "C:\"
-  Checkpoint-Computer -Description "RestorePoint1" -RestorePointType "MODIFY_SETTINGS"
+	Write-Output "Creating Restore Point incase something bad happens"
+	Enable-ComputerRestore -Drive "C:\"
+	Checkpoint-Computer -Description "RestorePoint1" -RestorePointType "MODIFY_SETTINGS"
 }
 
 Function DebloatAll {
-
+	
     $Bloatware = @(
-
-        #Unnecessary Windows 10 AppX Apps
-        "Microsoft.BingNews"
-        "Microsoft.GetHelp"
-        "Microsoft.Getstarted"
-        "Microsoft.Messaging"
-        "Microsoft.Microsoft3DViewer"
-        "Microsoft.MicrosoftSolitaireCollection"
-        "Microsoft.NetworkSpeedTest"
-        "Microsoft.News"
-        "Microsoft.Office.Lens"
-        "Microsoft.Office.Sway"
-        "Microsoft.OneConnect"
-        "Microsoft.People"
-        "Microsoft.Print3D"
-        "Microsoft.SkypeApp"
-        "Microsoft.StorePurchaseApp"
-        "Microsoft.Whiteboard"
-        "Microsoft.WindowsAlarms"
-        "microsoft.windowscommunicationsapps"
-        "Microsoft.WindowsFeedbackHub"
-        "Microsoft.WindowsMaps"
-        "Microsoft.WindowsSoundRecorder"
-        "Microsoft.ZuneMusic"
-        "Microsoft.ZuneVideo"
-
-        #Sponsored Windows 10 AppX Apps
-        #Add sponsored/featured apps to remove in the "*AppName*" format
-        "*EclipseManager*"
-        "*ActiproSoftwareLLC*"
-        "*AdobeSystemsIncorporated.AdobePhotoshopExpress*"
-        "*Duolingo-LearnLanguagesforFree*"
-        "*PandoraMediaInc*"
-        "*CandyCrush*"
-        "*BubbleWitch3Saga*"
-        "*Wunderlist*"
-        "*Flipboard*"
-        "*Twitter*"
-        "*Facebook*"
-        "*Spotify*"
-        "*Royal Revolt*"
-        "*Sway*"
-        "*Speed Test*"
-        "*Dolby*"
-             
-        #Optional: Typically not removed but you can if you need to for some reason
-        #"*Microsoft.Advertising.Xaml_10.1712.5.0_x64__8wekyb3d8bbwe*"
-        #"*Microsoft.Advertising.Xaml_10.1712.5.0_x86__8wekyb3d8bbwe*"
-        #"*Microsoft.BingWeather*"
-        #"*Microsoft.MSPaint*"
-        #"*Microsoft.MicrosoftStickyNotes*"
-        #"*Microsoft.Windows.Photos*"
-        #"*Microsoft.WindowsCalculator*"
-        #"*Microsoft.WindowsStore*"
+	
+	#Unnecessary Windows 10 AppX Apps
+	"Microsoft.BingNews"
+	"Microsoft.GetHelp"
+	"Microsoft.Getstarted"
+	"Microsoft.Messaging"
+	"Microsoft.Microsoft3DViewer"
+	"Microsoft.MicrosoftSolitaireCollection"
+	"Microsoft.NetworkSpeedTest"
+	"Microsoft.News"
+	"Microsoft.Office.Lens"
+	"Microsoft.Office.Sway"
+	"Microsoft.OneConnect"
+	"Microsoft.People"
+	"Microsoft.Print3D"
+	"Microsoft.SkypeApp"
+	"Microsoft.StorePurchaseApp"
+	"Microsoft.Whiteboard"
+	"Microsoft.WindowsAlarms"
+	"microsoft.windowscommunicationsapps"
+	"Microsoft.WindowsFeedbackHub"
+	"Microsoft.WindowsMaps"
+	"Microsoft.WindowsSoundRecorder"
+	"Microsoft.ZuneMusic"
+	"Microsoft.ZuneVideo"
+	
+	#Sponsored Windows 10 AppX Apps
+	#Add sponsored/featured apps to remove in the "*AppName*" format
+	"*EclipseManager*"
+	"*ActiproSoftwareLLC*"
+	"*AdobeSystemsIncorporated.AdobePhotoshopExpress*"
+	"*Duolingo-LearnLanguagesforFree*"
+	"*PandoraMediaInc*"
+	"*CandyCrush*"
+	"*BubbleWitch3Saga*"
+	"*Wunderlist*"
+	"*Flipboard*"
+	"*Twitter*"
+	"*Facebook*"
+	"*Spotify*"
+	"*Royal Revolt*"
+	"*Sway*"
+	"*Speed Test*"
+	"*Dolby*"
+	
+	#Optional: Typically not removed but you can if you need to for some reason
+	#"*Microsoft.Advertising.Xaml_10.1712.5.0_x64__8wekyb3d8bbwe*"
+	#"*Microsoft.Advertising.Xaml_10.1712.5.0_x86__8wekyb3d8bbwe*"
+	#"*Microsoft.BingWeather*"
+	#"*Microsoft.MSPaint*"
+	#"*Microsoft.MicrosoftStickyNotes*"
+	#"*Microsoft.Windows.Photos*"
+	#"*Microsoft.WindowsCalculator*"
+	#"*Microsoft.WindowsStore*"
     )
     foreach ($Bloat in $Bloatware) {
         Get-AppxPackage -Name $Bloat| Remove-AppxPackage
         Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $Bloat | Remove-AppxProvisionedPackage -Online
         Write-Output "Trying to remove $Bloat."
-    }
+	}
 }
 
 ##########
@@ -3035,27 +3066,28 @@ If ($args) {
 	}
 }
 
-# Call the desired tweak functions
-$tweaks | ForEach { Invoke-Expression $_ }
+
+#### Modification by Crapling
+#### Source: https://github.com/farag2/Windows-10-Setup-Script
 
 ##############
 # other functionality
 ##############
 
 # Save all opened folders in order to restore them after File Explorer restart
-function RememberExplorerOnExplorerRestart {
+function RememberOnExplorerRestart {
 	Clear-Variable -Name OpenedFolders -Force -ErrorAction Ignore
 	$OpenedFolders = {(New-Object -ComObject Shell.Application).Windows() | ForEach-Object -Process {$_.Document.Folder.Self.Path}}.Invoke()
 	# Restart explorer in order to take changes in effect
-		Stop-Process -Name explorer -Force
+	Stop-Process -Name explorer -Force
 	# Restore closed folders
-		foreach ($OpenedFolder in $OpenedFolders)
+	foreach ($OpenedFolder in $OpenedFolders)
+	{
+		if (Test-Path -Path $OpenedFolder)
 		{
-			if (Test-Path -Path $OpenedFolder)
-			{
-				Invoke-Item -Path $OpenedFolder
-			}
+			Invoke-Item -Path $OpenedFolder
 		}
+	}
 }
 
 # Turn on automatic backup the system registry to the %SystemRoot%\System32\config\RegBack folder
@@ -3063,127 +3095,200 @@ function EnableRegistryBackup{
 	New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager" -Name EnablePeriodicBackup -PropertyType DWord -Value 1 -Force
 }
 
-
 # Pin useful system apps shortcuts to Start
 function PinSystemAppsToStart {
-if (Test-Path -Path $PSScriptRoot\syspin.exe)
-{
-	$syspin = $true
-}
-else
-{
-	try
+	if (Test-Path -Path $PSScriptRoot\syspin.exe)
 	{
-		# Downloading syspin.exe
-		# http://www.technosys.net/products/utils/pintotaskbar
-		# SHA256: 6967E7A3C2251812DD6B3FA0265FB7B61AADC568F562A98C50C345908C6E827
-		[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-		if ((Invoke-WebRequest -Uri https://www.google.com -UseBasicParsing -DisableKeepAlive -Method Head).StatusDescription)
-		{
-			$Parameters = @{
-				Uri = "https://github.com/farag2/Windows-10-Setup-Script/raw/master/Start%20menu%20pinning/syspin.exe"
-				OutFile = "$PSScriptRoot\syspin.exe"
-				Verbose = [switch]::Present
-			}
-			Invoke-WebRequest @Parameters
-			$syspin = $true
-		}
-	}
-	catch
-	{
-		if ($Error.Exception.Status -eq "NameResolutionFailure")
-		{
-				Write-Warning -Message "No Internet connection" -ErrorAction SilentlyContinue
-		}
-	}
-}
-
-if ($syspin -eq $true)
-{
-	# Pin "Control Panel" to Start
-	$Items = (New-Object -ComObject Shell.Application).NameSpace("shell:::{4234d49b-0245-4df3-b780-3893943456e1}").Items()
-	$ControlPanelLocalizedName = ($Items | Where-Object -FilterScript {$_.Path -eq "Microsoft.Windows.ControlPanel"}).Name
-
-		Write-Verbose -Message "`"$ControlPanelLocalizedName`" shortcut is being pinned to Start" -Verbose
-
-	# Check whether the Control Panel shortcut was ever pinned
-	if (Test-Path -Path "$env:APPDATA\Microsoft\Windows\Start menu\Programs\$ControlPanelLocalizedName.lnk")
-	{
-		$Arguments = @"
-"$env:APPDATA\Microsoft\Windows\Start menu\Programs\$ControlPanelLocalizedName.lnk" "51201"
-"@
-		Start-Process -FilePath $PSScriptRoot\syspin.exe -WindowStyle Hidden -ArgumentList $Arguments -Wait
+		$syspin = $true
 	}
 	else
 	{
-		# The "Pin" verb is not available on the control.exe file so the shortcut has to be created
-		$Shell = New-Object -ComObject Wscript.Shell
-		$Shortcut = $Shell.CreateShortcut("$env:SystemRoot\System32\$ControlPanelLocalizedName.lnk")
-		$Shortcut.TargetPath = "$env:SystemRoot\System32\control.exe"
-		$Shortcut.Save()
-
-		$Arguments = @"
+		try
+		{
+			# Downloading syspin.exe
+			# http://www.technosys.net/products/utils/pintotaskbar
+			# SHA256: 6967E7A3C2251812DD6B3FA0265FB7B61AADC568F562A98C50C345908C6E827
+			[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+			if ((Invoke-WebRequest -Uri https://www.google.com -UseBasicParsing -DisableKeepAlive -Method Head).StatusDescription)
+			{
+				$Parameters = @{
+					Uri = "https://github.com/farag2/Windows-10-Setup-Script/raw/master/Start%20menu%20pinning/syspin.exe"
+					OutFile = "$PSScriptRoot\syspin.exe"
+					Verbose = [switch]::Present
+				}
+				Invoke-WebRequest @Parameters
+				$syspin = $true
+			}
+		}
+		catch
+		{
+			if ($Error.Exception.Status -eq "NameResolutionFailure")
+			{
+				Write-Warning -Message "No Internet connection" -ErrorAction SilentlyContinue
+			}
+		}
+	}
+	
+	if ($syspin -eq $true)
+	{
+		# Pin "Control Panel" to Start
+		$Items = (New-Object -ComObject Shell.Application).NameSpace("shell:::{4234d49b-0245-4df3-b780-3893943456e1}").Items()
+		$ControlPanelLocalizedName = ($Items | Where-Object -FilterScript {$_.Path -eq "Microsoft.Windows.ControlPanel"}).Name
+		
+		Write-Verbose -Message "`"$ControlPanelLocalizedName`" shortcut is being pinned to Start" -Verbose
+		
+		# Check whether the Control Panel shortcut was ever pinned
+		if (Test-Path -Path "$env:APPDATA\Microsoft\Windows\Start menu\Programs\$ControlPanelLocalizedName.lnk")
+		{
+$Arguments = @"
+"$env:APPDATA\Microsoft\Windows\Start menu\Programs\$ControlPanelLocalizedName.lnk" "51201"
+"@
+			Start-Process -FilePath $PSScriptRoot\syspin.exe -WindowStyle Hidden -ArgumentList $Arguments -Wait
+		}
+		else
+		{
+			# The "Pin" verb is not available on the control.exe file so the shortcut has to be created
+			$Shell = New-Object -ComObject Wscript.Shell
+			$Shortcut = $Shell.CreateShortcut("$env:SystemRoot\System32\$ControlPanelLocalizedName.lnk")
+			$Shortcut.TargetPath = "$env:SystemRoot\System32\control.exe"
+			$Shortcut.Save()
+			
+$Arguments = @"
 "$env:SystemRoot\System32\$ControlPanelLocalizedName.lnk" "51201"
 "@
-		Start-Process -FilePath $PSScriptRoot\syspin.exe -WindowStyle Hidden -ArgumentList $Arguments -Wait
-		Remove-Item -Path "$env:SystemRoot\System32\$ControlPanelLocalizedName.lnk" -Force
-	}
+			Start-Process -FilePath $PSScriptRoot\syspin.exe -WindowStyle Hidden -ArgumentList $Arguments -Wait
+			Remove-Item -Path "$env:SystemRoot\System32\$ControlPanelLocalizedName.lnk" -Force
+		}
 		# restart Start Menu
 		Stop-Process -Name StartMenuExperienceHost -Force -ErrorAction Ignore
-}
+	}
 }
 
 ##############
 # change drive functions
 ##############
 
-# Change location of the user folders
-function UserShellFolder
-{
 <#
-.SYNOPSIS
-	Change location of the each user folders using SHSetKnownFolderPath function
-.EXAMPLE
-	UserShellFolder -UserFolder Desktop -FolderPath "C:\Desktop"
-.NOTES
-	User files or folders won't me moved to the new location
+	.SYNOPSIS
+	The "Show menu" function using PowerShell with the up/down arrow keys and enter key to make a selection
+	.EXAMPLE
+	ShowMenu -Menu $ListOfItems -Default $DefaultChoice
+	.NOTES
+	Doesn't work in PowerShell ISE
 #>
+function ShowMenu
+{
 	[CmdletBinding()]
 	param
 	(
-		[Parameter(Mandatory = $true)]
-		[ValidateSet("Desktop", "Documents", "Downloads", "Music", "Pictures", "Videos")]
-		[string]
-		$UserFolder,
-
-		[Parameter(Mandatory = $true)]
-		[string]
-		$FolderPath
+	[Parameter()]
+	[string]
+	$Title,
+	
+	[Parameter(Mandatory = $true)]
+	[array]
+	$Menu,
+	
+	[Parameter(Mandatory = $true)]
+	[int]
+	$Default
 	)
-
-	function KnownFolderPath
+	
+	Write-Information -MessageData $Title -InformationAction Continue
+	
+	$minY = [Console]::CursorTop
+	$y = [Math]::Max([Math]::Min($Default, $Menu.Count), 0)
+	do
 	{
+		[Console]::CursorTop = $minY
+		[Console]::CursorLeft = 0
+		$i = 0
+		foreach ($item in $Menu)
+		{
+			if ($i -ne $y)
+			{
+				Write-Information -MessageData ('  {0}. {1}  ' -f ($i+1), $item) -InformationAction Continue
+			}
+			else
+			{
+				Write-Information -MessageData ('[ {0}. {1} ]' -f ($i+1), $item) -InformationAction Continue
+			}
+			$i++
+		}
+		
+		$k = [Console]::ReadKey()
+		switch ($k.Key)
+		{
+			"UpArrow"
+			{
+				if ($y -gt 0)
+				{
+					$y--
+				}
+			}
+			"DownArrow"
+			{
+				if ($y -lt ($Menu.Count - 1))
+				{
+					$y++
+				}
+			}
+			"Enter"
+			{
+				return $Menu[$y]
+			}
+		}
+	}
+	while ($k.Key -notin ([ConsoleKey]::Escape, [ConsoleKey]::Enter))
+}
+
+# Change location of the various folders
+function UserShellFolder
+{
+	
 	<#
-	.SYNOPSIS
-		Redirect user folders to a new location
-	.EXAMPLE
-		KnownFolderPath -KnownFolder Desktop -Path "C:\Desktop"
-	.NOTES
+		.SYNOPSIS
+		Change location of the each user folders using SHSetKnownFolderPath function
+		.EXAMPLE
+		UserShellFolder -UserFolder Desktop -FolderPath "C:\Desktop"
+		.NOTES
 		User files or folders won't me moved to the new location
 	#>
+	[CmdletBinding()]
+	param
+	(
+	[Parameter(Mandatory = $true)]
+	[ValidateSet("Desktop", "Documents", "Downloads", "Music", "Pictures", "Videos")]
+	[string]
+	$UserFolder,
+	
+	[Parameter(Mandatory = $true)]
+	[string]
+	$FolderPath
+	)
+	function KnownFolderPath
+	{
+		<#
+			.SYNOPSIS
+			Redirect user folders to a new location
+			.EXAMPLE
+			KnownFolderPath -KnownFolder Desktop -Path "C:\Desktop"
+			.NOTES
+			User files or folders won't me moved to the new location
+		#>
 		[CmdletBinding()]
 		param
 		(
-			[Parameter(Mandatory = $true)]
-			[ValidateSet("Desktop", "Documents", "Downloads", "Music", "Pictures", "Videos")]
-			[string]
-			$KnownFolder,
-
-			[Parameter(Mandatory = $true)]
-			[string]
-			$Path
+		[Parameter(Mandatory = $true)]
+		[ValidateSet("Desktop", "Documents", "Downloads", "Music", "Pictures", "Videos")]
+		[string]
+		$KnownFolder,
+		
+		[Parameter(Mandatory = $true)]
+		[string]
+		$Path
 		)
-
+		
 		$KnownFolders = @{
 			"Desktop"	= @("B4BFCC3A-DB2C-424C-B029-7FE99A87C641");
 			"Documents"	= @("FDD39AD0-238F-46AF-ADB4-6C85480369C7", "f42ee2d3-909f-4907-8871-4c22fc0bf756");
@@ -3192,12 +3297,12 @@ function UserShellFolder
 			"Pictures"	= @("33E28130-4E1E-4676-835A-98395C3BC3BB", "0ddd015d-b06c-45d5-8c4c-f59713854639");
 			"Videos"	= @("18989B1D-99B5-455B-841C-AB7C74E4DDFC", "35286a68-3c57-41a1-bbb1-0eae73d76c95");
 		}
-
+		
 		$Signature = @{
-			Namespace = "WinAPI"
-			Name = "KnownFolders"
-			Language = "CSharp"
-			MemberDefinition = @"
+		Namespace = "WinAPI"
+		Name = "KnownFolders"
+		Language = "CSharp"
+		MemberDefinition = @"
 [DllImport("shell32.dll")]
 public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, IntPtr token, [MarshalAs(UnmanagedType.LPWStr)] string path);
 "@
@@ -3206,14 +3311,14 @@ public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, Int
 		{
 			Add-Type @Signature
 		}
-
+		
 		foreach ($guid in $KnownFolders[$KnownFolder])
 		{
 			[WinAPI.KnownFolders]::SHSetKnownFolderPath([ref]$guid, 0, 0, $Path)
 		}
 		(Get-Item -Path $Path -Force).Attributes = "ReadOnly"
 	}
-
+	
 	$UserShellFoldersRegName = @{
 		"Desktop"	=	"Desktop"
 		"Documents"	=	"Personal"
@@ -3222,7 +3327,7 @@ public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, Int
 		"Pictures"	=	"My Pictures"
 		"Videos"	=	"My Video"
 	}
-
+	
 	$UserShellFoldersGUID = @{
 		"Desktop"	=	"{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}"
 		"Documents"	=	"{F42EE2D3-909F-4907-8871-4C22FC0BF756}"
@@ -3231,182 +3336,347 @@ public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, Int
 		"Pictures"	=	"{0DDD015D-B06C-45D5-8C4C-F59713854639}"
 		"Videos"	=	"{35286A68-3C57-41A1-BBB1-0EAE73D76C95}"
 	}
-
+	
 	# Hidden desktop.ini for each type of user folders
 	$DesktopINI = @{
 		"Desktop"	=	"",
-						"[.ShellClassInfo]",
-						"LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21769",
-						"IconResource=%SystemRoot%\system32\imageres.dll,-183"
+		"[.ShellClassInfo]",
+		"LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21769",
+		"IconResource=%SystemRoot%\system32\imageres.dll,-183"
 		"Documents"	=	"",
-						"[.ShellClassInfo]",
-						"LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21770",
-						"IconResource=%SystemRoot%\system32\imageres.dll,-112",
-						"IconFile=%SystemRoot%\system32\shell32.dll",
-						"IconIndex=-235"
+		"[.ShellClassInfo]",
+		"LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21770",
+		"IconResource=%SystemRoot%\system32\imageres.dll,-112",
+		"IconFile=%SystemRoot%\system32\shell32.dll",
+		"IconIndex=-235"
 		"Downloads"	=	"",
-						"[.ShellClassInfo]","LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21798",
-						"IconResource=%SystemRoot%\system32\imageres.dll,-184"
+		"[.ShellClassInfo]","LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21798",
+		"IconResource=%SystemRoot%\system32\imageres.dll,-184"
 		"Music"		=	"",
-						"[.ShellClassInfo]","LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21790",
-						"InfoTip=@%SystemRoot%\system32\shell32.dll,-12689",
-						"IconResource=%SystemRoot%\system32\imageres.dll,-108",
-						"IconFile=%SystemRoot%\system32\shell32.dll","IconIndex=-237"
+		"[.ShellClassInfo]","LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21790",
+		"InfoTip=@%SystemRoot%\system32\shell32.dll,-12689",
+		"IconResource=%SystemRoot%\system32\imageres.dll,-108",
+		"IconFile=%SystemRoot%\system32\shell32.dll","IconIndex=-237"
 		"Pictures"	=	"",
-						"[.ShellClassInfo]",
-						"LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21779",
-						"InfoTip=@%SystemRoot%\system32\shell32.dll,-12688",
-						"IconResource=%SystemRoot%\system32\imageres.dll,-113",
-						"IconFile=%SystemRoot%\system32\shell32.dll",
-						"IconIndex=-236"
+		"[.ShellClassInfo]",
+		"LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21779",
+		"InfoTip=@%SystemRoot%\system32\shell32.dll,-12688",
+		"IconResource=%SystemRoot%\system32\imageres.dll,-113",
+		"IconFile=%SystemRoot%\system32\shell32.dll",
+		"IconIndex=-236"
 		"Videos"	=	"",
-						"[.ShellClassInfo]",
-						"LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21791",
-						"InfoTip=@%SystemRoot%\system32\shell32.dll,-12690",
-						"IconResource=%SystemRoot%\system32\imageres.dll,-189",
-						"IconFile=%SystemRoot%\system32\shell32.dll","IconIndex=-238"
+		"[.ShellClassInfo]",
+		"LocalizedResourceName=@%SystemRoot%\system32\shell32.dll,-21791",
+		"InfoTip=@%SystemRoot%\system32\shell32.dll,-12690",
+		"IconResource=%SystemRoot%\system32\imageres.dll,-189",
+		"IconFile=%SystemRoot%\system32\shell32.dll","IconIndex=-238"
 	}
-
+	
 	# Determining the current user folder path
 	$UserShellFolderRegValue = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" -Name $UserShellFoldersRegName[$UserFolder]
 	if ($UserShellFolderRegValue -ne $FolderPath)
 	{
 		if ((Get-ChildItem -Path $UserShellFolderRegValue | Measure-Object).Count -ne 0)
 		{
-	
 			
-				Write-Error -Message "Some files left in the $UserShellFolderRegValue folder. Move them manually to a new location" -ErrorAction SilentlyContinue
+			
+			Write-Error -Message "Some files left in the $UserShellFolderRegValue folder. Move them manually to a new location" -ErrorAction SilentlyContinue
 			
 		}
-
+		
 		# Creating a new folder if there is no one
 		if (-not (Test-Path -Path $FolderPath))
 		{
 			New-Item -Path $FolderPath -ItemType Directory -Force
 		}
-
+		
 		KnownFolderPath -KnownFolder $UserFolder -Path $FolderPath
 		New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" -Name $UserShellFoldersGUID[$UserFolder] -PropertyType ExpandString -Value $FolderPath -Force
-
+		
 		Set-Content -Path "$FolderPath\desktop.ini" -Value $DesktopINI[$UserFolder] -Encoding Unicode -Force
 		(Get-Item -Path "$FolderPath\desktop.ini" -Force).Attributes = "Hidden", "System", "Archive"
 		(Get-Item -Path "$FolderPath\desktop.ini" -Force).Refresh()
 	}
 }
 
-# Documents
-$Title = ""
+$DriveLetters
+
+# Initialize connected Drives, for further tweaking
+function InitDrives{
+	
+	# Store all drives letters to use them within ShowMenu function
+    if (!($DriveLetters == null)){
+	    Write-Verbose "Retrieving drives..." -Verbose
+	
+	    $DriveLetters = @((Get-Disk | Where-Object -FilterScript {$_.BusType -ne "USB"} | Get-Partition | Get-Volume | Where-Object -FilterScript {$null -ne $_.DriveLetter}).DriveLetter | Sort-Object)
+	
+	    if ($DriveLetters.Count -gt 1)
+	    {
+		    # If the number of disks is more than one, set the second drive in the list as default drive
+		    $Default = 1
+	    }
+	    else
+	    {
+		    $Default = 0
+	    }
+    }
+}
+
+# changing default location drive for Desktop,Documents,Downloads,Music,Pictures,Videos
+function ChangeDefaultUserLibraryDrive{
+
+    InitDrives
+
+	# Desktop
+	$Message = "To change the location of the Desktop folder enter the required letter"
+	Write-Warning -Message "`nFiles will not be moved"
+	$Options = "&Change", "&Skip"
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+	
+	switch ($Result)
+	{
+		"0"
+		{
+			$Title = "`nSelect the drive where the `"Desktop`" folder will be moved to"
+			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			UserShellFolder -UserFolder Desktop -FolderPath "${SelectedDrive}:\Users\$env:UserName\Desktop"
+		}
+		"1"
+		{
+			Write-Verbose -Message "Skipped" -Verbose
+		}
+	}
+	
+	# Documents
+	$Title = ""
 	$Message = "To change the location of the Documents folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
 	$Options = "&Change", "&Skip"
-
-$DefaultChoice = 1
-$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-
-switch ($Result)
-{
-	"0"
+	
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+	
+	switch ($Result)
 	{
-		
-		$Title = "`nSelect the drive within the root of which the `"Documents`" folder will be created"
-
-		$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
-		UserShellFolder -UserFolder Documents -FolderPath "${SelectedDrive}:\Documents"
-	}
-	"1"
-	{
+		"0"
+		{
+			
+			$Title = "`nSelect the drive where the `"Documents`" folder will be moved to"
+			
+			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			UserShellFolder -UserFolder Documents -FolderPath "${SelectedDrive}:\Users\$env:UserName\Documents"
+		}
+		"1"
+		{
 			Write-Verbose -Message "Skipped" -Verbose
+		}
 	}
-}
-
-# Downloads
-$Title = ""
+	
+	# Downloads
+	$Title = ""
 	$Message = "To change the location of the Downloads folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
 	$Options = "&Change", "&Skip"
-
-$DefaultChoice = 1
-$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-
-switch ($Result)
-{
-	"0"
+	
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+	
+	switch ($Result)
 	{
-		$Title = "`nSelect the drive within the root of which the `"Downloads`" folder will be created"
-		$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
-		UserShellFolder -UserFolder Downloads -FolderPath "${SelectedDrive}:\Downloads"
-	}
-	"1"
-	{
+		"0"
+		{
+			$Title = "`nSelect the drive where the `"Downloads`" folder will be moved to"
+			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			UserShellFolder -UserFolder Downloads -FolderPath "${SelectedDrive}:\Users\$env:UserName\Downloads"
+		}
+		"1"
+		{
 			Write-Verbose -Message "Skipped" -Verbose
+		}
 	}
-}
-
-# Music
-$Title = ""
+	
+	# Music
+	$Title = ""
 	$Message = "To change the location of the Music folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
 	$Options = "&Change", "&Skip"
-
-$DefaultChoice = 1
-$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-
-switch ($Result)
-{
-	"0"
+	
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+	
+	switch ($Result)
 	{
-		$Title = "`nSelect the drive within the root of which the `"Music`" folder will be created"
-		$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
-		UserShellFolder -UserFolder Music -FolderPath "${SelectedDrive}:\Music"
-	}
-	"1"
-	{
+		"0"
+		{
+			$Title = "`nSelect the drive where the `"Music`" folder will be moved to"
+			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			UserShellFolder -UserFolder Music -FolderPath "${SelectedDrive}:\Users\$env:UserName\Music"
+		}
+		"1"
+		{
 			write-Verbose -Message "Skipped" -Verbose
+		}
 	}
-}
-
-
-# Pictures
-$Title = ""
+	
+	
+	# Pictures
+	$Title = ""
+	
 	$Message = "To change the location of the Pictures folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
 	$Options = "&Change", "&Skip"
-
-$DefaultChoice = 1
-$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-
-switch ($Result)
-{
-	"0"
+	
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+	
+	switch ($Result)
 	{
-		$Title = "`nSelect the drive within the root of which the `"Pictures`" folder will be created"
-		$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
-		UserShellFolder -UserFolder Pictures -FolderPath "${SelectedDrive}:\Pictures"
-	}
-	"1"
-	{
+		"0"
+		{
+			$Title = "`nSelect the drive where the `"Pictures`" folder will be moved to"
+			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			UserShellFolder -UserFolder Pictures -FolderPath "${SelectedDrive}:\Users\$env:UserName\Pictures"
+		}
+		"1"
+		{
 			Write-Verbose -Message "Skipped" -Verbose
+		}
 	}
-}
-
-# Videos
-$Title = ""
+	
+	# Videos
+	$Title = ""
 	$Message = "To change the location of the Videos folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
 	$Options = "&Change", "&Skip"
-$DefaultChoice = 1
-$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-
-switch ($Result)
-{
-	"0"
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+	
+	switch ($Result)
 	{
-			$Title = "`nSelect the drive within the root of which the `"Videos`" folder will be created"
-		$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
-		UserShellFolder -UserFolder Videos -FolderPath "${SelectedDrive}:\Videos"
-	}
-	"1"
-	{
+		"0"
+		{
+			$Title = "`nSelect the drive where the `"Videos`" folder will be moved to"
+			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			UserShellFolder -UserFolder Videos -FolderPath "${SelectedDrive}:\Users\$env:UserName\Videos"
+		}
+		"1"
+		{
 			Write-Verbose -Message "Skipped" -Verbose
+		}
 	}
 }
+
+# changing default location drive for Program Files, Program Files (x86), Common Files(underlying in Program Files/Program Files (x86))
+function ChangeProgramInstallDrive{
+
+    InitDrives
+
+	# Program Files
+	$Title = ""
+	$Message = "To change the location of the Program Files folder enter the required letter"
+	Write-Warning -Message "`nFiles will not be moved"
+	Write-Error -Message "!WARNING! - This is not Recommended - find more information through your search engine of choice"
+	$Options = "&Change", "&Skip"
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+	
+	switch ($Result)
+	{
+		"0"
+		{
+			$Title = "`nSelect the drive where the `"Program Files`" folder will be moved to"
+			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			Write-Output "Changing Program Files Folder to $SelectedDrive..."
+			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "ProgramFilesDir" -Type String -Value "${SelectedDrive}:\Program Files"
+			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "ProgramW6432Dir" -Type String -Value "${SelectedDrive}:\Program Files"
+			
+			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "CommonFilesDir" -Type String -Value "${SelectedDrive}:\Program Files\Common Files"
+			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "CommonW6432Dir" -Type String -Value "${SelectedDrive}:\Program Files\Common Files"
+		}
+		"1"
+		{
+			Write-Verbose -Message "Skipped" -Verbose
+		}
+	}
+	
+	# Program Files(x86)
+	$Title = ""
+	$Message = "To change the location of the Program Files (x86) folder enter the required letter"
+	Write-Warning -Message "`nFiles will not be moved"
+    Write-Error -Message "!WARNING! - This is not Recommended - find more information through your search engine of choice"
+	$Options = "&Change", "&Skip"
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+	
+	switch ($Result)
+	{
+		"0"
+		{
+			$Title = "`nSelect the drive where the `"Program Files (x86)`" folder will be moved to"
+			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			Write-Output "Changing Program Files Folder to $SelectedDrive..."
+			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "ProgramFilesDir (x86)" -Type String -Value "${SelectedDrive}:\Program Files (x86)"
+			
+			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "CommonFilesDir (x86)" -Type String -Value "${SelectedDrive}:\Program Files (x86)\Common Files"
+		}
+		"1"
+		{
+			Write-Verbose -Message "Skipped" -Verbose
+		}
+	}
+}
+
+# changing default location drive for Temp
+function ChangeTempFolderDrive{
+
+    InitDrives
+
+	# Temp
+	$Title = ""
+	$Message = "To change the location of the Temp folder enter the required letter"
+	Write-Warning -Message "`nFiles will not be moved"
+	$Options = "&Change", "&Skip"
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+	
+	switch ($Result)
+	{
+		"0"
+		{
+			$Title = "`nSelect the drive where the `"Temp`" folder will be moved to"
+			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			Write-Output "Changing Temp Folder to $SelectedDrive..."
+			[System.Environment]::SetEnvironmentVariable("TEMP","${SelectedDrive}:\Users\$env:UserName\AppData\Local\Temp",[System.EnvironmentVariableTarget]::User)
+			[System.Environment]::SetEnvironmentVariable("TEMP","${SelectedDrive}:\Users\$env:UserName\AppData\Local\Temp",[System.EnvironmentVariableTarget]::Machine)
+			[System.Environment]::SetEnvironmentVariable("TMP","${SelectedDrive}:\Users\$env:UserName\AppData\Local\Temp",[System.EnvironmentVariableTarget]::User)
+			[System.Environment]::SetEnvironmentVariable("TMP","${SelectedDrive}:\Users\$env:UserName\AppData\Local\Temp",[System.EnvironmentVariableTarget]::Machine)
+		}
+		"1"
+		{
+			Write-Verbose -Message "Skipped" -Verbose
+		}
+	}
+}
+
+# backup registry
+function BackupRegistry{
+    Write-Output "creating registry backup..."
+
+    $strRootkeys=@("HKLM", "HKCU", "HKCR", "HKU", "HKCC")
+    $strExportPath = "C:\Users\$env:UserName\Backups\Registry"
+
+    mkdir C:\Users\$env:UserName\Backups -ErrorAction SilentlyContinue
+    mkdir $strExportPath -ErrorAction SilentlyContinue
+
+    foreach ($strRootkey in $strRootkeys){
+            Write-Output "Registry Key: $strRootkey..."
+            $strExportFileName = "RegistryBackup$strRootkey-$(get-date -f yyyyMMddhhmm).reg"
+            reg export "$strRootkey" "$strExportPath\$strExportFileName"
+    }
+}
+
+####
+
+# Call the desired tweak functions
+$tweaks | ForEach { Invoke-Expression $_ }
