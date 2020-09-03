@@ -29,6 +29,7 @@
 #
 #   Crapling Additions:
 #   
+#	- creating registry backup
 #   - Change default location of Program Files, Program Files (x86) and Temp 
 #   
 #
@@ -56,6 +57,12 @@ $tweaks = @(
     # END_WARNING
     #############
 
+    ### Unpinning ###
+    ## Modified by Crapling
+    "UnpinStartMenuTiles",
+    "UnpinTaskbarIcons",
+    ##
+
     ### other tweaks
     "RememberOnExplorerRestart",
     "EnableRegistryBackup",
@@ -68,10 +75,6 @@ $tweaks = @(
     "InstallTitusProgs", #REQUIRED FOR OTHER PROGRAM INSTALLS!
     "Install7Zip",
     "InstallNotepadplusplus",
-    ## Modified by Crapling
-    "InstallAdobe",
-    "InstallJava",
-    ##
 
     ### Windows Apps
     "DebloatAll",
@@ -138,6 +141,7 @@ $tweaks = @(
     "EnableIndexing",
     "SetBIOSTimeUTC",             # "SetBIOSTimeLocal",
     "DisableHibernation",		# "EnableHibernation",
+    #"DisableUpdateMSProducts",	  # "EnableUpdateMSProducts",
     ## Modified by Crapling 
     "DisableSleepButton",		  # "EnableSleepButton",         
     ##
@@ -145,7 +149,6 @@ $tweaks = @(
     "DisableFastStartup",         # "EnableFastStartup",
     ## Modified by Crapling
     "SetCurrentNetworkPrivate",   # "SetCurrentNetworkPublic",
-    "DisableUpdateMSProducts",	  # "EnableUpdateMSProducts",
     "EnableClipboardHistory",	  # "DisableClipboardHistory",
     "DisableAutoRebootOnCrash",	  # "EnableAutoRebootOnCrash",
     ##
@@ -178,8 +181,9 @@ $tweaks = @(
     # "AddENKeyboard",              # "RemoveENKeyboard",
     "EnableNumlock",             	# "DisableNumlock",
     "EnableDarkMode",				# "DisableDarkMode",
-    "Stop-EdgePDF",
+    
     ## Modified by Crapling
+    #"Stop-EdgePDF",
     "HideDefenderTrayIcon",			# "ShowDefenderTrayIcon",
     "HideRecentlyAddedApps",		# "ShowRecentlyAddedApps",
     "HideMostUsedApps", 			# "ShowMostUsedApps",
@@ -253,7 +257,7 @@ $tweaks = @(
     # "UninstallXPSPrinter",          # "InstallXPSPrinter",
     # "RemoveFaxPrinter",             # "AddFaxPrinter",
     ## Modified by Crapling
-    "DisableEdgeDesktopShortcutCreation", # "EnableEdgeShortcutCreation",
+    #"DisableEdgeDesktopShortcutCreation", # "EnableEdgeShortcutCreation",
     "DisableMediaSharing",				# "EnableMediaSharing",
     "UninstallHelloFace",			# "InstallHelloFace",
     "InstallNET23",					# "UninstallNET23",
@@ -267,12 +271,6 @@ $tweaks = @(
     # "DisableCtrlAltDelLogin",     # "EnableCtrlAltDelLogin",
     # "DisableIEEnhancedSecurity",  # "EnableIEEnhancedSecurity",
     # "EnableAudio",                # "DisableAudio",
-
-    ### Unpinning ###
-    ## Modified by Crapling
-    "UnpinStartMenuTiles",
-    "UnpinTaskbarIcons",
-    ##
 
     ### Auxiliary Functions ###
     ## Modified by Crapling
@@ -2877,25 +2875,80 @@ Function DisableAudio {
 
 # Unpin all Start Menu tiles - Note: This function has no counterpart. You have to pin the tiles back manually.
 Function UnpinStartMenuTiles {
-	Write-Output "Unpinning all Start Menu tiles..."
-	If ([System.Environment]::OSVersion.Version.Build -ge 15063 -And [System.Environment]::OSVersion.Version.Build -le 16299) {
-		Get-ChildItem -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount" -Include "*.group" -Recurse | ForEach-Object {
-			$data = (Get-ItemProperty -Path "$($_.PsPath)\Current" -Name "Data").Data -Join ","
-			$data = $data.Substring(0, $data.IndexOf(",0,202,30") + 9) + ",0,202,80,0,0"
-			Set-ItemProperty -Path "$($_.PsPath)\Current" -Name "Data" -Type Binary -Value $data.Split(",")
-		}
-		} ElseIf ([System.Environment]::OSVersion.Version.Build -eq 17133) {
-		$key = Get-ChildItem -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount" -Recurse | Where-Object { $_ -like "*start.tilegrid`$windows.data.curatedtilecollection.tilecollection\Current" }
-		$data = (Get-ItemProperty -Path $key.PSPath -Name "Data").Data[0..25] + ([byte[]](202,50,0,226,44,1,1,0,0))
-		Set-ItemProperty -Path $key.PSPath -Name "Data" -Type Binary -Value $data
-	}
+
+	$Message = "To unpin all start menu tiles select Unpin otherwise use Skip"
+	$Options = "&Unpin", "&Skip"
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+        Write-Output "Unpinning all Start Menu tiles..."
+	    If ([System.Environment]::OSVersion.Version.Build -ge 15063 -And [System.Environment]::OSVersion.Version.Build -le 16299) {
+		    Get-ChildItem -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount" -Include "*.group" -Recurse | ForEach-Object {
+			    $data = (Get-ItemProperty -Path "$($_.PsPath)\Current" -Name "Data").Data -Join ","
+			    $data = $data.Substring(0, $data.IndexOf(",0,202,30") + 9) + ",0,202,80,0,0"
+			    Set-ItemProperty -Path "$($_.PsPath)\Current" -Name "Data" -Type Binary -Value $data.Split(",")
+		    }
+	    } ElseIf ([System.Environment]::OSVersion.Version.Build -ge 17134 -And [System.Environment]::OSVersion.Version.Build -le 18361) {
+		    $key = Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount\*start.tilegrid`$windows.data.curatedtilecollection.tilecollection\Current"
+		    $data = $key.Data[0..25] + ([byte[]](202,50,0,226,44,1,1,0,0))
+		    Set-ItemProperty -Path $key.PSPath -Name "Data" -Type Binary -Value $data
+		    Stop-Process -Name "ShellExperienceHost" -Force -ErrorAction SilentlyContinue
+	    } elseif([System.Environment]::OSVersion.Version.Build -ge 18362){
+                Stop-Process -Name StartMenuExperienceHost -Force -ErrorAction Ignore
+            	$StartMenuLayout = @"
+<LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
+<LayoutOptions StartTileGroupCellWidth="6" />
+	<DefaultLayoutOverride>
+		<StartLayoutCollection>
+			<defaultlayout:StartLayout GroupCellWidth="6" />
+		</StartLayoutCollection>
+	</DefaultLayoutOverride>
+</LayoutModificationTemplate>
+"@
+		        $StartMenuLayoutPath = "$env:TEMP\StartMenuLayout.xml"
+		        # Saving StartMenuLayout.xml in UTF-8 encoding
+		        Set-Content -Path $StartMenuLayoutPath -Value (New-Object System.Text.UTF8Encoding).GetBytes($StartMenuLayout) -Encoding Byte -Force
+
+		        # Temporarily disable changing Start layout
+		        if (-not (Test-Path -Path HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer))
+		        {
+			        New-Item -Path HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer -Force
+		        }
+		        New-ItemProperty -Path HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer -Name LockedStartLayout -Value 1 -Force
+		        New-ItemProperty -Path HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer -Name StartLayoutFile -Value $StartMenuLayoutPath -Force
+
+		        # Restart the Start menu
+		        Stop-Process -Name StartMenuExperienceHost -Force -ErrorAction Ignore
+		        Start-Sleep -Seconds 3
+
+		        Remove-ItemProperty -Path HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer -Name LockedStartLayout -Force
+		        Remove-ItemProperty -Path HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer -Name StartLayoutFile -Force
+
+		        Stop-Process -Name StartMenuExperienceHost -Force -ErrorAction Ignore
+		        Remove-Item -LiteralPath $StartMenuLayoutPath -Force
+            }
+     }else{
+            Write-Output "Start menu tiles remain"
+     }
+
 }
 
 # Unpin all Taskbar icons - Note: This function has no counterpart. You have to pin the icons back manually.
 Function UnpinTaskbarIcons {
-	Write-Output "Unpinning all Taskbar icons..."
+    	
+	$Message = "To unpin all taskbar icons select Unpin otherwise use Skip"
+	$Options = "&Unpin", "&Skip"
+	$DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+    
+    if($Result -eq 0){
+	Write-Output "Unpinning all Taskbar icons...`n"
 	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Taskband" -Name "Favorites" -Type Binary -Value ([byte[]](255))
 	Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Taskband" -Name "FavoritesResolve" -ErrorAction SilentlyContinue
+    }else{
+        Write-Output "Taskbar icons remain"
+    }
 }
 
 
@@ -2949,23 +3002,23 @@ Function Stop-EdgePDF {
     $NoPDF = "HKCR:\.pdf"
     $NoProgids = "HKCR:\.pdf\OpenWithProgids"
     $NoWithList = "HKCR:\.pdf\OpenWithList" 
-    If (!(Get-ItemProperty $NoPDF  NoOpenWith)) {
-        New-ItemProperty $NoPDF NoOpenWith 
+    If (!(Get-ItemProperty -Path $NoPDF  NoOpenWith)) {
+        New-ItemProperty -Path $NoPDF NoOpenWith 
 	}        
-    If (!(Get-ItemProperty $NoPDF  NoStaticDefaultVerb)) {
-        New-ItemProperty $NoPDF  NoStaticDefaultVerb 
+    If (!(Get-ItemProperty -Path $NoPDF  NoStaticDefaultVerb)) {
+        New-ItemProperty -Path $NoPDF  NoStaticDefaultVerb 
 	}        
-    If (!(Get-ItemProperty $NoProgids  NoOpenWith)) {
-        New-ItemProperty $NoProgids  NoOpenWith 
+    If (!(Get-ItemProperty -Path $NoProgids  NoOpenWith)) {
+        New-ItemProperty -Path $NoProgids  NoOpenWith 
 	}        
-    If (!(Get-ItemProperty $NoProgids  NoStaticDefaultVerb)) {
-        New-ItemProperty $NoProgids  NoStaticDefaultVerb 
+    If (!(Get-ItemProperty -Path $NoProgids  NoStaticDefaultVerb)) {
+        New-ItemProperty -Path $NoProgids  NoStaticDefaultVerb 
 	}        
-    If (!(Get-ItemProperty $NoWithList  NoOpenWith)) {
-        New-ItemProperty $NoWithList  NoOpenWith
+    If (!(Get-ItemProperty -Path $NoWithList  NoOpenWith)) {
+        New-ItemProperty -Path $NoWithList  NoOpenWith
 	}        
-    If (!(Get-ItemProperty $NoWithList  NoStaticDefaultVerb)) {
-        New-ItemProperty $NoWithList  NoStaticDefaultVerb 
+    If (!(Get-ItemProperty -Path $NoWithList  NoStaticDefaultVerb)) {
+        New-ItemProperty -Path $NoWithList  NoStaticDefaultVerb 
 	}
 	
     #Appends an underscore '_' to the Registry key for Edge
@@ -3095,8 +3148,8 @@ function EnableRegistryBackup{
 	New-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Configuration Manager" -Name EnablePeriodicBackup -PropertyType DWord -Value 1 -Force
 }
 
-# Pin useful system apps shortcuts to Start
-function PinSystemAppsToStart {
+# Pin Control Panel shortcut to Start
+function PinControlPanelToStart {
 	if (Test-Path -Path $PSScriptRoot\syspin.exe)
 	{
 		$syspin = $true
@@ -3167,6 +3220,12 @@ $Arguments = @"
 ##############
 # change drive functions
 ##############
+
+
+# create variables for the different functions
+$global:IsInitialized = 0
+$global:Default = 0
+$global:DriveLetters
 
 <#
 	.SYNOPSIS
@@ -3399,26 +3458,25 @@ public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, Int
 	}
 }
 
-$DriveLetters
-
 # Initialize connected Drives, for further tweaking
 function InitDrives{
 	
 	# Store all drives letters to use them within ShowMenu function
-    if (!($DriveLetters == null)){
+    if ($global:IsInitialized -eq 0){
 	    Write-Verbose "Retrieving drives..." -Verbose
 	
-	    $DriveLetters = @((Get-Disk | Where-Object -FilterScript {$_.BusType -ne "USB"} | Get-Partition | Get-Volume | Where-Object -FilterScript {$null -ne $_.DriveLetter}).DriveLetter | Sort-Object)
+	    $global:DriveLetters = @((Get-Disk | Where-Object -FilterScript {$_.BusType -ne "USB"} | Get-Partition | Get-Volume | Where-Object -FilterScript {$null -ne $_.DriveLetter}).DriveLetter | Sort-Object)
 	
-	    if ($DriveLetters.Count -gt 1)
+	    if ($global:DriveLetters.Count -gt 1)
 	    {
 		    # If the number of disks is more than one, set the second drive in the list as default drive
-		    $Default = 1
+		    $global:Default = 1
 	    }
 	    else
 	    {
-		    $Default = 0
+		    $global:Default = 0
 	    }
+		$global:IsInitialized = 1
     }
 }
 
@@ -3439,7 +3497,7 @@ function ChangeDefaultUserLibraryDrive{
 		"0"
 		{
 			$Title = "`nSelect the drive where the `"Desktop`" folder will be moved to"
-			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			UserShellFolder -UserFolder Desktop -FolderPath "${SelectedDrive}:\Users\$env:UserName\Desktop"
 		}
 		"1"
@@ -3464,7 +3522,7 @@ function ChangeDefaultUserLibraryDrive{
 			
 			$Title = "`nSelect the drive where the `"Documents`" folder will be moved to"
 			
-			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			UserShellFolder -UserFolder Documents -FolderPath "${SelectedDrive}:\Users\$env:UserName\Documents"
 		}
 		"1"
@@ -3487,7 +3545,7 @@ function ChangeDefaultUserLibraryDrive{
 		"0"
 		{
 			$Title = "`nSelect the drive where the `"Downloads`" folder will be moved to"
-			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			UserShellFolder -UserFolder Downloads -FolderPath "${SelectedDrive}:\Users\$env:UserName\Downloads"
 		}
 		"1"
@@ -3510,7 +3568,7 @@ function ChangeDefaultUserLibraryDrive{
 		"0"
 		{
 			$Title = "`nSelect the drive where the `"Music`" folder will be moved to"
-			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			UserShellFolder -UserFolder Music -FolderPath "${SelectedDrive}:\Users\$env:UserName\Music"
 		}
 		"1"
@@ -3535,7 +3593,7 @@ function ChangeDefaultUserLibraryDrive{
 		"0"
 		{
 			$Title = "`nSelect the drive where the `"Pictures`" folder will be moved to"
-			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			UserShellFolder -UserFolder Pictures -FolderPath "${SelectedDrive}:\Users\$env:UserName\Pictures"
 		}
 		"1"
@@ -3557,7 +3615,7 @@ function ChangeDefaultUserLibraryDrive{
 		"0"
 		{
 			$Title = "`nSelect the drive where the `"Videos`" folder will be moved to"
-			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			UserShellFolder -UserFolder Videos -FolderPath "${SelectedDrive}:\Users\$env:UserName\Videos"
 		}
 		"1"
@@ -3576,7 +3634,7 @@ function ChangeProgramInstallDrive{
 	$Title = ""
 	$Message = "To change the location of the Program Files folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
-	Write-Error -Message "!WARNING! - This is not Recommended - find more information through your search engine of choice"
+	Write-Warning -Message "This is not Recommended - find more information through your search engine of choice"
 	$Options = "&Change", "&Skip"
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
@@ -3586,7 +3644,7 @@ function ChangeProgramInstallDrive{
 		"0"
 		{
 			$Title = "`nSelect the drive where the `"Program Files`" folder will be moved to"
-			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			Write-Output "Changing Program Files Folder to $SelectedDrive..."
 			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "ProgramFilesDir" -Type String -Value "${SelectedDrive}:\Program Files"
 			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "ProgramW6432Dir" -Type String -Value "${SelectedDrive}:\Program Files"
@@ -3604,7 +3662,7 @@ function ChangeProgramInstallDrive{
 	$Title = ""
 	$Message = "To change the location of the Program Files (x86) folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
-    Write-Error -Message "!WARNING! - This is not Recommended - find more information through your search engine of choice"
+    Write-Warning -Message "This is not Recommended - find more information through your search engine of choice"
 	$Options = "&Change", "&Skip"
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
@@ -3614,7 +3672,7 @@ function ChangeProgramInstallDrive{
 		"0"
 		{
 			$Title = "`nSelect the drive where the `"Program Files (x86)`" folder will be moved to"
-			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			Write-Output "Changing Program Files Folder to $SelectedDrive..."
 			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "ProgramFilesDir (x86)" -Type String -Value "${SelectedDrive}:\Program Files (x86)"
 			
@@ -3645,7 +3703,7 @@ function ChangeTempFolderDrive{
 		"0"
 		{
 			$Title = "`nSelect the drive where the `"Temp`" folder will be moved to"
-			$SelectedDrive = ShowMenu -Title $Title -Menu $DriveLetters -Default $Default
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			Write-Output "Changing Temp Folder to $SelectedDrive..."
 			[System.Environment]::SetEnvironmentVariable("TEMP","${SelectedDrive}:\Users\$env:UserName\AppData\Local\Temp",[System.EnvironmentVariableTarget]::User)
 			[System.Environment]::SetEnvironmentVariable("TEMP","${SelectedDrive}:\Users\$env:UserName\AppData\Local\Temp",[System.EnvironmentVariableTarget]::Machine)
@@ -3661,21 +3719,36 @@ function ChangeTempFolderDrive{
 
 # backup registry
 function BackupRegistry{
-    Write-Output "creating registry backup..."
 
-    $strRootkeys=@("HKLM", "HKCU", "HKCR", "HKU", "HKCC")
-    $strExportPath = "C:\Users\$env:UserName\Backups\Registry"
+    $Title = ""
+	$Message = "In case you want to backup your registry choose Backup"
+    Write-Output "`nRegistry Backup:"
+    Write-Warning -Message "This is recommended if you running this script the first time"
+    Write-Warning -Message "All registry backups made with this script will be overwritten"
+	Write-Warning -Message "The registry backups will be stored in C:\Users\$env:UserName\Backups\Registry"
+    $Options = "&Backup", "&Skip"
+	$DefaultChoice = 0
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 
-    mkdir C:\Users\$env:UserName\Backups -ErrorAction SilentlyContinue
-    mkdir $strExportPath -ErrorAction SilentlyContinue
+    if($Result -eq 0){
 
-    foreach ($strRootkey in $strRootkeys){
-            Write-Output "Registry Key: $strRootkey..."
-            $strExportFileName = "RegistryBackup$strRootkey-$(get-date -f yyyyMMddhhmm).reg"
-            reg export "$strRootkey" "$strExportPath\$strExportFileName"
-    }
+        Write-Output "creating registry backup..."
+
+        $strRootkeys=@("HKLM", "HKCU", "HKCR", "HKU", "HKCC")
+        $strExportPath = "C:\Users\$env:UserName\Backups\Registry"
+
+        mkdir C:\Users\$env:UserName\Backups -ErrorAction SilentlyContinue
+        mkdir $strExportPath -ErrorAction SilentlyContinue
+
+        foreach ($strRootkey in $strRootkeys){
+                Write-Output "Registry Keys: $strRootkey..."
+                $strExportFileName = "RegistryBackup$strRootkey.reg"
+                reg export "$strRootkey" "$strExportPath\$strExportFileName" /y
+        }
+    }else{
+        Write-Output "no registry backup will be made"
+        }
 }
-
 ####
 
 # Call the desired tweak functions
