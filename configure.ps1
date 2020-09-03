@@ -41,7 +41,7 @@ $tweaks = @(
     "RequireAdmin",
     "CreateRestorePoint",
 
-    #### Modification by Crapling
+    #### Modified by Crapling
     ### backup registry
     "BackupRegistry",
 
@@ -99,7 +99,7 @@ $tweaks = @(
     "DisableWAPPush",               # "EnableWAPPush",
 
     ### Security Tweaks ###
-    ## Modification by Crapling
+    ## Modified by Crapling
     "SetUACHigh", 					#"SetUACLow",
     ##
     # "EnableSharingMappedDrives",  # "DisableSharingMappedDrives",
@@ -114,7 +114,7 @@ $tweaks = @(
     "EnableFirewall",
     "EnableDefender",
     "EnableDefenderCloud",
-    ## Modification by Crapling
+    ## Modified by Crapling
     #"EnableF8BootMenu",             # "DisableF8BootMenu",
     ##
     #"SetDEPOptOut",                 # "SetDEPOptIn",
@@ -2873,6 +2873,7 @@ Function DisableAudio {
 # Unpinning
 ##########
 
+##Modified by Crapling
 # Unpin all Start Menu tiles - Note: This function has no counterpart. You have to pin the tiles back manually.
 Function UnpinStartMenuTiles {
 
@@ -2897,7 +2898,7 @@ Function UnpinStartMenuTiles {
 	    } elseif([System.Environment]::OSVersion.Version.Build -ge 18362){
                 Stop-Process -Name StartMenuExperienceHost -Force -ErrorAction Ignore
             	$StartMenuLayout = @"
-<LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModification">
+<LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModified">
 <LayoutOptions StartTileGroupCellWidth="6" />
 	<DefaultLayoutOverride>
 		<StartLayoutCollection>
@@ -2931,8 +2932,8 @@ Function UnpinStartMenuTiles {
      }else{
             Write-Output "Start menu tiles remain"
      }
-
 }
+##
 
 # Unpin all Taskbar icons - Note: This function has no counterpart. You have to pin the icons back manually.
 Function UnpinTaskbarIcons {
@@ -2967,6 +2968,9 @@ Function RequireAdmin {
 
 # Wait for key press
 Function WaitForKey {
+	##Modified by Crapling
+	Write-Warning -Message "About to restart to apply changes, close this window if you want to restart later manually"
+	##
 	Write-Output "Press any key to continue..."
 	[Console]::ReadKey($true) | Out-Null
 }
@@ -3120,7 +3124,7 @@ If ($args) {
 }
 
 
-#### Modification by Crapling
+#### Modified by Crapling
 #### Source: https://github.com/farag2/Windows-10-Setup-Script
 
 ##############
