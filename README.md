@@ -6,7 +6,10 @@ I forked ChrisTitusTech's scripts (https://github.com/ChrisTitusTech/win10script
 
 ## My Additions
 
-- 
+- creating registry backup
+- Change default location of Program Files, Program Files (x86) and Temp 
+- added prompts for program installation
+- added programs to install
 
 ## Modifications
 Just like ChrisTitusTech I encourage people to fork this project and comment out things they don't like! Here is a list of normal things people change:
