@@ -31,6 +31,8 @@
 #   
 #	- creating registry backup
 #   - Change default location of Program Files, Program Files (x86) and Temp 
+#   - added prompts for program installation
+#	- added programs to install
 #   
 #
 ##########
@@ -56,25 +58,24 @@ $tweaks = @(
     #############
     # END_WARNING
     #############
-
-    ### Unpinning ###
-    ## Modified by Crapling
-    "UnpinStartMenuTiles",
-    "UnpinTaskbarIcons",
-    ##
-
-    ### other tweaks
-    "RememberOnExplorerRestart",
-    "EnableRegistryBackup",
-    "PinControlPanelToStart",
-    ####
-
-
-
-    ### External Program Setup
+	
+	### External Program Setup
     "InstallTitusProgs", #REQUIRED FOR OTHER PROGRAM INSTALLS!
     "Install7Zip",
     "InstallNotepadplusplus",
+
+    ##Modified by Crapling
+    "InstallFirefox",
+    "InstallCmder",
+    "InstallDiscord",
+    "InstallAdobe",
+    "InstallJava",
+    "InstallWSL2",
+    
+    ### other tweaks ###
+    "RememberOnExplorerRestart",
+    "EnableRegistryBackup",
+    ##
 
     ### Windows Apps
     "DebloatAll",
@@ -249,7 +250,9 @@ $tweaks = @(
     "InstallMediaPlayer", 		# "UninstallMediaPlayer",
     "UninstallInternetExplorer",  # "InstallInternetExplorer",
     "UninstallWorkFolders",       # "InstallWorkFolders",
-    "InstallLinuxSubsystem",      # "UninstallLinuxSubsystem",
+    ## Modified by Crapling
+    # "InstallLinuxSubsystem",      # "UninstallLinuxSubsystem",
+    ##
     # "InstallHyperV",              # "UninstallHyperV",
     "SetPhotoViewerAssociation",    # "UnsetPhotoViewerAssociation",
     "AddPhotoViewerOpenWith",       # "RemovePhotoViewerOpenWith",
@@ -260,7 +263,6 @@ $tweaks = @(
     #"DisableEdgeDesktopShortcutCreation", # "EnableEdgeShortcutCreation",
     "DisableMediaSharing",				# "EnableMediaSharing",
     "UninstallHelloFace",			# "InstallHelloFace",
-    "InstallNET23",					# "UninstallNET23",
     ##
 
 
@@ -271,6 +273,15 @@ $tweaks = @(
     # "DisableCtrlAltDelLogin",     # "EnableCtrlAltDelLogin",
     # "DisableIEEnhancedSecurity",  # "EnableIEEnhancedSecurity",
     # "EnableAudio",                # "DisableAudio",
+	
+	### Unpinning ###
+    "UnpinStartMenuTiles",
+    "UnpinTaskbarIcons",
+	
+	##Modified by Crapling
+	"PinControlPanelToStart",
+	"InstallNET23",					# "UninstallNET23",
+	##
 
     ### Auxiliary Functions ###
     ## Modified by Crapling
@@ -283,41 +294,256 @@ $tweaks = @(
 # Recommended Titus Programs
 #########
 
+# create variables for the different functions
+$global:DontInstallProgs = 0
+$global:IsInitialized = 0
+$global:Default = 0
+$global:DriveLetters
+
+
+##Modified by Crapling
 Function InstallTitusProgs {
-	Write-Output "Installing Chocolatey"
-	Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-	choco install chocolatey-core.extension -y
-	Write-Output "Running O&O Shutup with Recommended Settings"
-	Import-Module BitsTransfer
-	Start-BitsTransfer -Source "https://raw.githubusercontent.com/ChrisTitusTech/win10script/master/ooshutup10.cfg" -Destination ooshutup10.cfg
-	Start-BitsTransfer -Source "https://dl5.oo-software.com/files/ooshutup10/OOSU10.exe" -Destination OOSU10.exe
-	./OOSU10.exe ooshutup10.cfg /quiet
+	$Title = ""
+	$Message = "To Install Chocolatey hit I or R to also change the installation drive"
+	$Options = "&Install", "&RelocateAndInstall", "&Skip"
+	Write-Output "About to install Chocolatey"
+    Write-Warning -Message "This is required for base programs"
+	$DefaultChoice = 2
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+	if($Result -eq 1){
+		initDrives
+		$Title = "`nSelect the drive where Chocolatey should be installed"
+		$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
+		[System.Environment]::SetEnvironmentVariable("ChocolateyInstall","${SelectedDrive}:\Program Files (x86)\Chocolatey",[System.EnvironmentVariableTarget]::Machine)
+		Write-Output "Parsing Environment Variable..."
+		# reinit environment variable
+		$env:ChocolateyInstall = [System.Environment]::GetEnvironmentVariable("ChocolateyInstall","Machine")
+	}
+	if($Result -le 1){
+		Write-Output "Installing Chocolatey..."
+		Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+		choco install chocolatey-core.extension -y
+		Write-Output "Running O&O Shutup with Recommended Settings"
+		Import-Module BitsTransfer
+		Start-BitsTransfer -Source "https://raw.githubusercontent.com/ChrisTitusTech/win10script/master/ooshutup10.cfg" -Destination ooshutup10.cfg
+		Start-BitsTransfer -Source "https://dl5.oo-software.com/files/ooshutup10/OOSU10.exe" -Destination OOSU10.exe
+		./OOSU10.exe ooshutup10.cfg /quiet
+	}else{
+		Write-Warning -Message "Skipping..."
+		if(!(Test-Path env:ChocolateyInstall)){		
+			$global:DontInstallProgs=1
+		}
+	}
 }
 
 Function InstallAdobe {
-	Write-Output "Installing Adobe Acrobat Reader"
-	choco install adobereader -y
+	if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Install Adobe Reader hit I otherwise use S to skip"
+		$Options = "&Install", "&Skip"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+		if($Result -eq 0){
+			Write-Output "Installing Adobe Reader..."
+			choco install adobereader -y
+		}else{
+			Write-Warning -Message "Skipping..."
+		}
+	}
 }
 
 Function InstallJava {
-	Write-Output "Installing Java"
-	choco install jre8 -y
+	if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Install Java hit I otherwise use S to skip"
+		$Options = "&Install", "&Skip"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+		if($Result -eq 0){
+			Write-Output "Installing Java..."
+			choco install jre8 -y
+		}else{
+			Write-Warning -Message "Skipping..."
+		}
+	}
 }
 
 Function Install7Zip {
-	Write-Output "Installing 7-Zip"
-	choco install 7zip -y
+	if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Install 7zip hit I otherwise use S to skip"
+		$Options = "&Install", "&Skip"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+		if($Result -eq 0){
+			Write-Output "Installing 7zip..."
+			choco install 7zip -y
+		}else{
+			Write-Warning -Message "Skipping..."
+		}
+	}
 }
 
 Function InstallNotepadplusplus {
-	Write-Output "Installing Notepad++"
-	choco install notepadplusplus -y
+	if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Install Notepad++ hit I otherwise use S to skip"
+		$Options = "&Install", "&Skip"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+		if($Result -eq 0){
+			Write-Output "Installing Notepad++..."
+			choco install notepadplusplus -y
+		}else{
+			Write-Warning -Message "Skipping..."
+		}
+	}
 }
 
 Function InstallMediaPlayerClassic {
-	Write-Output "Installing Media Player Classic (VLC Alternative)"
-	choco install mpc-hc -y
+	if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Install MediaPlayerClassic hit I otherwise use S to skip"
+		$Options = "&Install", "&Skip"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+		if($Result -eq 0){
+			Write-Output "Installing MediaPlayerClassic..."
+			choco install mpc-hc -y
+		}else{
+			Write-Warning -Message "Skipping..."
+		}
+	}
 }
+
+Function InstallFirefox {
+	if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Install Firefox hit I otherwise use S to skip"
+		$Options = "&Install", "&Skip"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+		if($Result -eq 0){
+			Write-Output "Installing Firefox..."
+			choco install firefox -y
+		}else{
+			Write-Warning -Message "Skipping..."
+		}
+	}
+}
+
+Function InstallDiscord {
+	if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Install Discord hit I otherwise use S to skip"
+		$Options = "&Install", "&Skip"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+		if($Result -eq 0){
+			Write-Output "Installing Discord..."
+			choco install discord -y
+		}else{
+			Write-Warning -Message "Skipping..."
+		}
+	}
+}
+
+Function InstallCmder {
+	if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Install Cmder hit I or R to also change the installation drive, otherwise use S to skip"
+		$Options = "&Install", "&Skip", "&RelocateAndInstall"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+        $InstallDir
+
+		if($Result -eq 2){
+			initDrives
+			$Title = "`nSelect the drive where Cmder should be installed"
+			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
+            $InstallDir = "${SelectedDrive}:\Chocolatey\tools"
+			[System.Environment]::SetEnvironmentVariable("ChocolateyToolsLocation", $InstallDir,[System.EnvironmentVariableTarget]::Machine)
+			Write-Output "Parsing Environment Variable..."
+			# reinit environment variable
+			$env:ChocolateyToolsLocation = [System.Environment]::GetEnvironmentVariable("ChocolateyToolsLocation","Machine")
+		    
+            AddCmderToContextMenu "$InstallDir\Cmder\Cmder.exe"
+            
+            Write-Output "Installing Cmder..."
+			choco install cmder -y
+        }elseif ($Result -eq 0){
+            AddCmderToContextMenu                
+
+            [System.Environment]::SetEnvironmentVariable("ChocolateyToolsLocation", "C:\tools",[System.EnvironmentVariableTarget]::Machine)
+            $env:ChocolateyToolsLocation = [System.Environment]::GetEnvironmentVariable("ChocolateyToolsLocation","Machine")
+
+			Write-Output "Installing Cmder..."
+			choco install cmder -y
+		}else{
+			Write-Warning -Message "Skipping..."
+		}
+	}
+}
+
+Function InstallWSL2 {
+    if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Enable WSL2 hit E or use S to skip"
+		$Options = "&Enable", "&Skip"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+		if($Result -eq 0){
+            InstallLinuxSubsystem
+            InstallHyperV
+            wsl --set-default-version 2
+        }
+    }
+}
+
+#add to shift + right click context menu
+function AddCmderToContextMenu([String] $InstallPath = "C:\tools\Cmder\Cmder.exe"){
+    $Title = ""
+    $Message = "To Install Cmder to the shift + right click context menu use A, otherwise use S to skip"
+	$Options = "&Add", "&Skip"
+
+    $DefaultChoice = 0
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    
+
+    if($Result -eq 0){
+
+    New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
+    $RegPath = "HKCR:\Directory\Background\shell\Open Cmder here"
+
+    Write-Output "Adding Cmder to context menu..."
+    if(!(Test-Path $RegPath)){
+        New-Item -Path $RegPath
+    }
+        New-ItemProperty -Path $RegPath -Name "ShowBasedOnVelocityId" -Type DWord -Value 6527944 -Force
+        New-ItemProperty -Path $RegPath -Name "Extended" -Type String -Force
+    if(!(Test-Path "$RegPath\command")){
+        New-Item -Path "$RegPath\command"
+    }
+        Set-ItemProperty -Path "$RegPath\command" -Name ‘(Default)’ -Value $InstallPath
+    }else{
+        Write-Warning -Message "Skipping..."
+    }
+}
+
+##
 
 ##########
 # Privacy Tweaks
@@ -2610,8 +2836,9 @@ Function InstallHyperV {
 	If ((Get-WmiObject -Class "Win32_OperatingSystem").Caption -like "*Server*") {
 		Install-WindowsFeature -Name "Hyper-V" -IncludeManagementTools -WarningAction SilentlyContinue | Out-Null
 		} Else {
-		Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null
-	}
+		Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null    	
+    }
+    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 }
 
 # Uninstall Hyper-V - Not applicable to Home
@@ -2890,12 +3117,12 @@ Function UnpinStartMenuTiles {
 			    $data = $data.Substring(0, $data.IndexOf(",0,202,30") + 9) + ",0,202,80,0,0"
 			    Set-ItemProperty -Path "$($_.PsPath)\Current" -Name "Data" -Type Binary -Value $data.Split(",")
 		    }
-	    } ElseIf ([System.Environment]::OSVersion.Version.Build -ge 17134 -And [System.Environment]::OSVersion.Version.Build -le 18361) {
+	    } ElseIf ([System.Environment]::OSVersion.Version.Build -ge 17134 -And [System.Environment]::OSVersion.Version.Build -le 18359) {
 		    $key = Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount\*start.tilegrid`$windows.data.curatedtilecollection.tilecollection\Current"
 		    $data = $key.Data[0..25] + ([byte[]](202,50,0,226,44,1,1,0,0))
 		    Set-ItemProperty -Path $key.PSPath -Name "Data" -Type Binary -Value $data
 		    Stop-Process -Name "ShellExperienceHost" -Force -ErrorAction SilentlyContinue
-	    } elseif([System.Environment]::OSVersion.Version.Build -ge 18362){
+	    } elseif([System.Environment]::OSVersion.Version.Build -ge 18360){
                 Stop-Process -Name StartMenuExperienceHost -Force -ErrorAction Ignore
             	$StartMenuLayout = @"
 <LayoutModificationTemplate xmlns:defaultlayout="http://schemas.microsoft.com/Start/2014/FullDefaultLayout" xmlns:start="http://schemas.microsoft.com/Start/2014/StartLayout" Version="1" xmlns="http://schemas.microsoft.com/Start/2014/LayoutModified">
@@ -2937,7 +3164,6 @@ Function UnpinStartMenuTiles {
 
 # Unpin all Taskbar icons - Note: This function has no counterpart. You have to pin the icons back manually.
 Function UnpinTaskbarIcons {
-    	
 	$Message = "To unpin all taskbar icons select Unpin otherwise use Skip"
 	$Options = "&Unpin", "&Skip"
 	$DefaultChoice = 1
@@ -3224,12 +3450,6 @@ $Arguments = @"
 ##############
 # change drive functions
 ##############
-
-
-# create variables for the different functions
-$global:IsInitialized = 0
-$global:Default = 0
-$global:DriveLetters
 
 <#
 	.SYNOPSIS
