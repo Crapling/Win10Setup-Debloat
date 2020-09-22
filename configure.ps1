@@ -7,16 +7,11 @@
 ## Modified by Crapling
 ## Additional Tweaks source: https://github.com/farag2/Windows-10-Setup-Script
 #
-#
 #    If you're a power user looking to tweak your machinea, or doing larger roll-out.. 
 #    Use the @Disassembler0 script instead. It'll probably be more up-to-date than mine:
 #    https://github.com/Disassembler0/Win10-Initial-Setup-Script
 # 
 #    Note from author: Never run scripts without reading them & understanding what they do.
-#
-#	Addition: One command to rule them all, One command to find it, and One command to Run it! 
-#
-#     > powershell -nop -c "iex(New-Object Net.WebClient).DownloadString('https://git.io/JJ8R4')"
 #
 #	Chris Titus Additions:
 #

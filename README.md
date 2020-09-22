@@ -3,11 +3,12 @@ This is the Ultimate Windows 10 Script from a creation from multiple debloat scr
 I also added various programs for my default Windows 10 Installation.
 
 I forked ChrisTitusTech's scripts (https://github.com/ChrisTitusTech/win10script) and made some minor adjustments to fit my liking.
+Aditionally I used some code from faraq2's debloat script (https://github.com/farag2/Windows-10-Setup-Script)
 
 ## My Additions
 
 - creating registry backup
-- Change default location of Program Files, Program Files (x86) and Temp 
+- optionally change default location of Program Files, Program Files (x86) and Temp 
 - added prompts for program installation
 - added programs to install
 
