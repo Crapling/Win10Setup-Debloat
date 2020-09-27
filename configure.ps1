@@ -42,17 +42,9 @@ $tweaks = @(
     ### backup registry
     "BackupRegistry",
 
-    ### provide the Option to change default installation drive (for example when using a small ssd as system drive) ###
-    #############
-    # !WARNING!
-    #############
-    # changing Folders default location can result in strange results (especically the Program Files Folders), do this at your own risk
+    ### provide the Option to change default drive for various save locations (for example when using a small ssd as system drive) ###
     "ChangeDefaultUserLibraryDrive",
-    "ChangeProgramInstallDrive",
     "ChangeTempFolderDrive",
-    #############
-    # END_WARNING
-    #############
 	
 	### External Program Setup
     "InstallTitusProgs", #REQUIRED FOR OTHER PROGRAM INSTALLS!
@@ -176,7 +168,7 @@ $tweaks = @(
     "EnableDarkMode",				# "DisableDarkMode",
     
     ## Modified by Crapling
-    #"Stop-EdgePDF",
+    "Stop-EdgePDF",
     "HideDefenderTrayIcon",			# "ShowDefenderTrayIcon",
     "HideRecentlyAddedApps",		# "ShowRecentlyAddedApps",
     "HideMostUsedApps", 			# "ShowMostUsedApps",
@@ -272,6 +264,15 @@ $tweaks = @(
 	
 	##Modified by Crapling
 	"PinControlPanelToStart",
+    ### provide the Option to change default installation drive (for example when using a small ssd as system drive) ###
+    #############
+    # !WARNING!
+    #############
+    # changing Folders default location can result in strange results (especically the Program Files Folders), do this at your own risk
+    "ChangeProgramInstallDrive",
+    #############
+    # END_WARNING
+    #############
 	"InstallNET23",					# "UninstallNET23",
 	##
 
@@ -291,7 +292,6 @@ $global:DontInstallProgs = 0
 $global:IsInitialized = 0
 $global:Default = 0
 $global:DriveLetters
-
 
 ##Modified by Crapling
 Function InstallTitusProgs {
@@ -424,8 +424,9 @@ function AddCmderToContextMenu([String] $InstallPath = "C:\tools\Cmder\Cmder.exe
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 
     if($Result -eq 0){
+	
+	New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
 
-    New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
     $RegPath = "HKCR:\Directory\Background\shell\Open Cmder here"
 
     Write-Output "Adding Cmder to context menu..."
@@ -3162,8 +3163,11 @@ Function DisableDarkMode {
 Function Stop-EdgePDF {
     
     #Stops edge from taking over as the default .PDF viewer    
-    Write-Output "Stopping Edge from taking over as the default .PDF viewer"
-    $NoPDF = "HKCR:\.pdf"
+    Write-Output "Stopping Edge from taking over as the default .PDF viewer..."
+	
+	New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
+    
+	$NoPDF = "HKCR:\.pdf"
     $NoProgids = "HKCR:\.pdf\OpenWithProgids"
     $NoWithList = "HKCR:\.pdf\OpenWithList" 
     If (!(Get-ItemProperty -Path $NoPDF  NoOpenWith)) {
