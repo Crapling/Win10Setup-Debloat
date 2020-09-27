@@ -47,7 +47,7 @@ $tweaks = @(
     "ChangeTempFolderDrive",
 	
 	### External Program Setup
-    "InstallTitusProgs", #REQUIRED FOR OTHER PROGRAM INSTALLS!
+    "InstallChoco", #REQUIRED FOR OTHER PROGRAM INSTALLS!
     "Install7Zip",
     "InstallNotepadplusplus",
 
@@ -294,7 +294,7 @@ $global:Default = 0
 $global:DriveLetters
 
 ##Modified by Crapling
-Function InstallTitusProgs {
+Function InstallChoco {
 	$Title = ""
 	$Message = "To Install Chocolatey hit I or R to also change the installation drive"
 	$Options = "&Install", "&RelocateAndInstall", "&Skip"
@@ -307,16 +307,22 @@ Function InstallTitusProgs {
 		initDrives
 		$Title = "`nSelect the drive where Chocolatey should be installed"
 		$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
+		$New_Location = "${SelectedDrive}:\Program Files (x86)\Chocolatey"
+		if ("$env:ChocolateyInstall" -AND $SelectedDrive -ne $env:ChocolateyInstall.Substring(0,1)) {
+			Move-Item -force "$env:ChocolateyInstall" "${SelectedDrive}:\Program Files (x86)"
+		} elseif (!("$env:ChocolateyInstall")) {
+			$Result = 0
+		}
 		[System.Environment]::SetEnvironmentVariable("ChocolateyInstall","${SelectedDrive}:\Program Files (x86)\Chocolatey",[System.EnvironmentVariableTarget]::Machine)
 		Write-Output "Parsing Environment Variable..."
 		# reinit environment variable
-		$env:ChocolateyInstall = [System.Environment]::GetEnvironmentVariable("ChocolateyInstall","Machine")
-	}
-	if($Result -le 1){
-		Write-Output "Installing Chocolatey..."
-		Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-		choco install chocolatey-core.extension -y
-	}else{
+		$env:ChocolateyInstall = [System.Environment]::GetEnvironmentVariable("ChocolateyInstall","Machine")	
+		}
+	if($Result -eq 0){
+			Write-Output "Installing Chocolatey..."
+			Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+			choco install chocolatey-core.extension -y
+		}else{
 		Write-Warning -Message "Skipping..."
 		if(!(Test-Path env:ChocolateyInstall)){		
 			$global:DontInstallProgs=1
