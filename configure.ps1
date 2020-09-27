@@ -60,12 +60,9 @@ $tweaks = @(
     "InstallNotepadplusplus",
 
     ##Modified by Crapling
-    "InstallFirefox",
     "InstallCmder",
-    "InstallDiscord",
-    "InstallAdobe",
-    "InstallJava",
     "InstallWSL2",
+    "InstallO_OShutup",
     
     ### other tweaks ###
     "RememberOnExplorerRestart",
@@ -319,49 +316,10 @@ Function InstallTitusProgs {
 		Write-Output "Installing Chocolatey..."
 		Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 		choco install chocolatey-core.extension -y
-		Write-Output "Running O&O Shutup with Recommended Settings"
-		Import-Module BitsTransfer
-		Start-BitsTransfer -Source "https://raw.githubusercontent.com/ChrisTitusTech/win10script/master/ooshutup10.cfg" -Destination ooshutup10.cfg
-		Start-BitsTransfer -Source "https://dl5.oo-software.com/files/ooshutup10/OOSU10.exe" -Destination OOSU10.exe
-		./OOSU10.exe ooshutup10.cfg /quiet
 	}else{
 		Write-Warning -Message "Skipping..."
 		if(!(Test-Path env:ChocolateyInstall)){		
 			$global:DontInstallProgs=1
-		}
-	}
-}
-
-Function InstallAdobe {
-	if($global:DontInstallProgs -eq 0){
-		$Title = ""
-		$Message = "To Install Adobe Reader hit I otherwise use S to skip"
-		$Options = "&Install", "&Skip"
-		
-		$DefaultChoice = 1
-		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-		if($Result -eq 0){
-			Write-Output "Installing Adobe Reader..."
-			choco install adobereader -y
-		}else{
-			Write-Warning -Message "Skipping..."
-		}
-	}
-}
-
-Function InstallJava {
-	if($global:DontInstallProgs -eq 0){
-		$Title = ""
-		$Message = "To Install Java hit I otherwise use S to skip"
-		$Options = "&Install", "&Skip"
-		
-		$DefaultChoice = 1
-		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-		if($Result -eq 0){
-			Write-Output "Installing Java..."
-			choco install jre8 -y
-		}else{
-			Write-Warning -Message "Skipping..."
 		}
 	}
 }
@@ -394,57 +352,6 @@ Function InstallNotepadplusplus {
 		if($Result -eq 0){
 			Write-Output "Installing Notepad++..."
 			choco install notepadplusplus -y
-		}else{
-			Write-Warning -Message "Skipping..."
-		}
-	}
-}
-
-Function InstallMediaPlayerClassic {
-	if($global:DontInstallProgs -eq 0){
-		$Title = ""
-		$Message = "To Install MediaPlayerClassic hit I otherwise use S to skip"
-		$Options = "&Install", "&Skip"
-		
-		$DefaultChoice = 1
-		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-		if($Result -eq 0){
-			Write-Output "Installing MediaPlayerClassic..."
-			choco install mpc-hc -y
-		}else{
-			Write-Warning -Message "Skipping..."
-		}
-	}
-}
-
-Function InstallFirefox {
-	if($global:DontInstallProgs -eq 0){
-		$Title = ""
-		$Message = "To Install Firefox hit I otherwise use S to skip"
-		$Options = "&Install", "&Skip"
-		
-		$DefaultChoice = 1
-		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-		if($Result -eq 0){
-			Write-Output "Installing Firefox..."
-			choco install firefox -y
-		}else{
-			Write-Warning -Message "Skipping..."
-		}
-	}
-}
-
-Function InstallDiscord {
-	if($global:DontInstallProgs -eq 0){
-		$Title = ""
-		$Message = "To Install Discord hit I otherwise use S to skip"
-		$Options = "&Install", "&Skip"
-		
-		$DefaultChoice = 1
-		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-		if($Result -eq 0){
-			Write-Output "Installing Discord..."
-			choco install discord -y
 		}else{
 			Write-Warning -Message "Skipping..."
 		}
@@ -516,8 +423,6 @@ function AddCmderToContextMenu([String] $InstallPath = "C:\tools\Cmder\Cmder.exe
     $DefaultChoice = 0
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 
-    
-
     if($Result -eq 0){
 
     New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
@@ -538,6 +443,25 @@ function AddCmderToContextMenu([String] $InstallPath = "C:\tools\Cmder\Cmder.exe
     }
 }
 
+Function InstallO_OShutup {
+    $Title = ""
+    $Message = "To install O&O Shutup use I, otherwise use S to skip"
+	$Options = "&Install", "&Skip"
+
+    $DefaultChoice = 0
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+        Write-Output "Running O&O Shutup with Recommended Settings..."
+        Import-Module BitsTransfer
+	    Start-BitsTransfer -Source "https://raw.githubusercontent.com/ChrisTitusTech/win10script/master/ooshutup10.cfg" -Destination ooshutup10.cfg
+	    Start-BitsTransfer -Source "https://dl5.oo-software.com/files/ooshutup10/OOSU10.exe" -Destination OOSU10.exe
+	    ./OOSU10.exe ooshutup10.cfg /quiet
+    }else{
+        Write-Warning -Message "Skipping..."
+    }
+}
+
 ##
 
 ##########
@@ -548,6 +472,7 @@ function AddCmderToContextMenu([String] $InstallPath = "C:\tools\Cmder\Cmder.exe
 # Note: This tweak may cause Enterprise edition to stop receiving Windows updates.
 # Windows Update control panel will then show message "Your device is at risk because it's out of date and missing important security and quality updates. Let's get you back on track so Windows can run more securely. Select this button to get going".
 # In such case, enable telemetry, run Windows update and then disable telemetry again. See also https://github.com/Disassembler0/Win10-Initial-Setup-Script/issues/57
+
 Function DisableTelemetry {
 	Write-Output "Disabling Telemetry..."
 	Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\DataCollection" -Name "AllowTelemetry" -Type DWord -Value 0
@@ -2825,18 +2750,32 @@ Function UninstallLinuxSubsystem {
 	Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -NoRestart -WarningAction SilentlyContinue | Out-Null
 }
 
-# Install Hyper-V - Not applicable to Home
+# Install Hyper-V
 Function InstallHyperV {
 	Write-Output "Installing Hyper-V..."
-	If ((Get-WmiObject -Class "Win32_OperatingSystem").Caption -like "*Server*") {
-		Install-WindowsFeature -Name "Hyper-V" -IncludeManagementTools -WarningAction SilentlyContinue | Out-Null
-		} Else {
-		Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null    	
+    If (!(((Get-WmiObject -Class "Win32_OperatingSystem").Caption).Contains("Home"))) {
+	    If ((Get-WmiObject -Class "Win32_OperatingSystem").Caption -like "*Server*") {
+		    Install-WindowsFeature -Name "Hyper-V" -IncludeManagementTools -WarningAction SilentlyContinue | Out-Null
+		    } Else {
+        If ([System.Environment]::OSVersion.Version.Build -ge 15063 -And [System.Environment]::OSVersion.Version.Build -le 18363) {
+		    Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null 
+        } Else {
+                dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+                dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V /all /norestart
+        }
+    } Else {
+            Push-Location "%~dp0"
+            Get-ChildItem -name "$Env:SystemRoot\servicing\Packages\*" -include "*Hyper-V*.mum" | Out-File "hyper-v.txt"
+            foreach ($file in Get-Content -Path "hyper-v.txt"){
+                dism.exe /online /norestart /add-package:"$Env:SystemRoot\servicing\Packages\$file"
+            }
+            Remove-Item "hyper-v.txt"
+            dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V -All /LimitAccess /ALL
+        }
     }
-    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 }
 
-# Uninstall Hyper-V - Not applicable to Home
+# Uninstall Hyper-V
 Function UninstallHyperV {
 	Write-Output "Uninstalling Hyper-V..."
 	If ((Get-WmiObject -Class "Win32_OperatingSystem").Caption -like "*Server*") {
