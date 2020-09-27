@@ -55,7 +55,7 @@ $tweaks = @(
     #############
 	
 	### External Program Setup
-    "InstallTitusProgs", #REQUIRED FOR OTHER PROGRAM INSTALLS!
+    "InstallChoco", #REQUIRED FOR OTHER PROGRAM INSTALLS!
     "Install7Zip",
     "InstallNotepadplusplus",
 
@@ -297,7 +297,7 @@ $global:DriveLetters
 
 
 ##Modified by Crapling
-Function InstallTitusProgs {
+Function InstallChoco {
 	$Title = ""
 	$Message = "To Install Chocolatey hit I or R to also change the installation drive"
 	$Options = "&Install", "&RelocateAndInstall", "&Skip"
@@ -532,7 +532,7 @@ function AddCmderToContextMenu([String] $InstallPath = "C:\tools\Cmder\Cmder.exe
     if(!(Test-Path "$RegPath\command")){
         New-Item -Path "$RegPath\command"
     }
-        Set-ItemProperty -Path "$RegPath\command" -Name ‘(Default)’ -Value $InstallPath
+        Set-ItemProperty -Path "$RegPath\command" -Name Â‘(Default)Â’ -Value $InstallPath
     }else{
         Write-Warning -Message "Skipping..."
     }
