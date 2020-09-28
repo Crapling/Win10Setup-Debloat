@@ -53,7 +53,7 @@ $tweaks = @(
 
     ##Modified by Crapling
     "InstallCmder",
-    "InstallWSL2",
+    "EnableWSL",
     "InstallO_OShutup",
     
     ### other tweaks ###
@@ -236,8 +236,9 @@ $tweaks = @(
     "UninstallWorkFolders",       # "InstallWorkFolders",
     ## Modified by Crapling
     # "InstallLinuxSubsystem",      # "UninstallLinuxSubsystem",
-    ##
     # "InstallHyperV",              # "UninstallHyperV",
+	"EnableVirtualMachinePlatform",   # "DisableVirtualMachinePlatform",
+	##
     "SetPhotoViewerAssociation",    # "UnsetPhotoViewerAssociation",
     "AddPhotoViewerOpenWith",       # "RemovePhotoViewerOpenWith",
     "InstallPDFPrinter"		# "UninstallPDFPrinter",
@@ -319,9 +320,13 @@ Function InstallChoco {
 		$env:ChocolateyInstall = [System.Environment]::GetEnvironmentVariable("ChocolateyInstall","Machine")	
 		}
 	if($Result -eq 0){
+		if (!($env:ChocolateyInstall) -or !(Test-Path -Path "$env:ChocolateyInstall" -ErrorAction SilentlyContinue)){
 			Write-Output "Installing Chocolatey..."
 			Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
 			choco install chocolatey-core.extension -y
+			} Else {
+				Write-Output "Chocolatey is already installed, skipping..."
+			}
 		}else{
 		Write-Warning -Message "Skipping..."
 		if(!(Test-Path env:ChocolateyInstall)){		
@@ -403,10 +408,10 @@ Function InstallCmder {
 	}
 }
 
-Function InstallWSL2 {
+Function EnableWSL {
     if($global:DontInstallProgs -eq 0){
 		$Title = ""
-		$Message = "To Enable WSL2 hit E or use S to skip"
+		$Message = "To Enable WSL hit E or use S to skip"
 		$Options = "&Enable", "&Skip"
 		
 		$DefaultChoice = 1
@@ -414,9 +419,8 @@ Function InstallWSL2 {
 
 		if($Result -eq 0){
             InstallLinuxSubsystem
-            InstallHyperV
-            wsl --set-default-version 2
-        }
+        }else{
+			Write-Warning -Message "Skipping..."
     }
 }
 
@@ -2757,6 +2761,19 @@ Function UninstallLinuxSubsystem {
 	Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux" -NoRestart -WarningAction SilentlyContinue | Out-Null
 }
 
+## Modified by Crapling
+#Enable VirtualMachinePlatform
+Function EnableVirtualMachinePlatform{
+	Write-Output "Enabling VirtualMachinePlatform..."
+	dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+}
+
+#Disable VirtualMachinePlatform
+Function EnableVirtualMachinePlatform{
+	Write-Output "Enabling VirtualMachinePlatform..."
+	dism.exe /online /disable-feature /featurename:VirtualMachinePlatform /all /norestart
+}
+
 # Install Hyper-V
 Function InstallHyperV {
 	Write-Output "Installing Hyper-V..."
@@ -2767,7 +2784,6 @@ Function InstallHyperV {
         If ([System.Environment]::OSVersion.Version.Build -ge 15063 -And [System.Environment]::OSVersion.Version.Build -le 18363) {
 		    Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null 
         } Else {
-                dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
                 dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V /all /norestart
         }
     } Else {
@@ -2791,7 +2807,7 @@ Function UninstallHyperV {
 		Disable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null
 	}
 }
-
+##
 # Set Photo Viewer association for bmp, gif, jpg, png and tif
 Function SetPhotoViewerAssociation {
 	Write-Output "Setting Photo Viewer association for bmp, gif, jpg, png and tif..."
