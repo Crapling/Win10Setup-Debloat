@@ -51,11 +51,14 @@ $tweaks = @(
     "Install7Zip",
     "InstallNotepadplusplus",
 
-    ##Modified by Crapling
     "InstallCmder",
     "EnableWSL",
     "InstallO_OShutup",
     
+	### UI Tweaks ###
+    "DisableActionCenter",          # "EnableActionCenter",
+	
+	
     ### other tweaks ###
     "RememberOnExplorerRestart",
     "EnableRegistryBackup",
@@ -473,6 +476,85 @@ Function InstallO_OShutup {
     }
 }
 
+# Uninstall OneNote
+Function UninstallOneNote {
+    $Title = ""
+    $Message = "To uninstall OneNote use U, otherwise use S to skip"
+	$Options = "&Uninstall", "&Skip"
+
+    $DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+        Write-Output "Uninstalling OneNote..."
+		Get-AppxPackage "Microsoft.Office.OneNote" | Remove-AppxPackage
+    }else{
+        Write-Warning -Message "Skipping..."
+    }
+}
+
+# Disable Lock screen
+Function DisableLockScreen {
+    $Title = ""
+    $Message = "To Disable the LockScreen use D, otherwise use E to Enable or S to Skip"
+	$Options = "&Disable", "&Enable", "&Skip"
+
+    $DefaultChoice = 2
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+		Write-Output "Disabling Lock screen..."
+		If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization")) {
+			New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" | Out-Null
+		}
+		Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name "NoLockScreen" -Type DWord -Value 1
+		# for Windows <= 1803
+		Write-Output "Disabling Lock screen using scheduler workaround..."
+		$service = New-Object -com Schedule.Service
+		$service.Connect()
+		$task = $service.NewTask(0)
+		$task.Settings.DisallowStartIfOnBatteries = $false
+		$trigger = $task.Triggers.Create(9)
+		$trigger = $task.Triggers.Create(11)
+		$trigger.StateChange = 8
+		$action = $task.Actions.Create(0)
+		$action.Path = "reg.exe"
+		$action.Arguments = "add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\SessionData /t REG_DWORD /v AllowLockScreen /d 0 /f"
+		$service.GetFolder("\").RegisterTaskDefinition("Disable LockScreen", $task, 6, "NT AUTHORITY\SYSTEM", $null, 4) | Out-Null
+	elseif($Result -eq 1){
+		Write-Output "Enabling Lock screen..."
+		Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name "NoLockScreen" -ErrorAction SilentlyContinue
+		# for Windows <= 1803
+		Write-Output "Enabling Lock screen (removing scheduler workaround)..."
+		Unregister-ScheduledTask -TaskName "Disable LockScreen" -Confirm:$false -ErrorAction SilentlyContinue
+	}
+	}else{
+        Write-Warning -Message "Skipping..."
+    }
+}
+}
+
+
+# Disable Action Center
+Function DisableActionCenter {
+	$Title = ""
+    $Message = "To disable the ActionCenter use D, otherwise use S to skip"
+	$Options = "&Disable", "&Skip"
+
+    $DefaultChoice = 1
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+		Write-Output "Disabling Action Center..."
+		If (!(Test-Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer")) {
+			New-Item -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" | Out-Null
+		}
+		Set-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableNotificationCenter" -Type DWord -Value 1
+		Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\PushNotifications" -Name "ToastEnabled" -Type DWord -Value 0
+	}else{
+        Write-Warning -Message "Skipping..."
+    }
+}
 ##
 
 ##########
@@ -1431,30 +1513,11 @@ Function EnableAutoRebootOnCrash {
 # UI Tweaks
 ##########
 
-# Disable Action Center
-Function DisableActionCenter {
-	Write-Output "Disabling Action Center..."
-	If (!(Test-Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer")) {
-		New-Item -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" | Out-Null
-	}
-	Set-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableNotificationCenter" -Type DWord -Value 1
-	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\PushNotifications" -Name "ToastEnabled" -Type DWord -Value 0
-}
-
 # Enable Action Center
 Function EnableActionCenter {
 	Write-Output "Enabling Action Center..."
 	Remove-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableNotificationCenter" -ErrorAction SilentlyContinue
 	Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\PushNotifications" -Name "ToastEnabled" -ErrorAction SilentlyContinue
-}
-
-# Disable Lock screen
-Function DisableLockScreen {
-	Write-Output "Disabling Lock screen..."
-	If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization")) {
-		New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" | Out-Null
-	}
-	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name "NoLockScreen" -Type DWord -Value 1
 }
 
 # Enable Lock screen
@@ -2475,7 +2538,6 @@ Function UninstallMsftBloat {
 	Get-AppxPackage "Microsoft.MSPaint" | Remove-AppxPackage
 	Get-AppxPackage "Microsoft.NetworkSpeedTest" | Remove-AppxPackage
 	Get-AppxPackage "Microsoft.OfficeLens" | Remove-AppxPackage
-	Get-AppxPackage "Microsoft.Office.OneNote" | Remove-AppxPackage
 	Get-AppxPackage "Microsoft.Office.Sway" | Remove-AppxPackage
 	Get-AppxPackage "Microsoft.OneConnect" | Remove-AppxPackage
 	Get-AppxPackage "Microsoft.People" | Remove-AppxPackage
