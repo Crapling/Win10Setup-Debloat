@@ -53,11 +53,17 @@ $tweaks = @(
 
     "InstallCmder",
     "EnableWSL",
-    "InstallO_OShutup",
-    
-	### UI Tweaks ###
-    "DisableActionCenter",          # "EnableActionCenter",
+    "InstallOOShutup",
 	
+	### Application Tweaks ###
+	"UninstallOneNote",
+	"UninstallWhiteboard",				
+    "UninstallOneDrive",
+    "DisableOneDrive",
+	
+	### UI Tweaks ###
+    "DisableActionCenter",
+    "DisableLockScreen", 
 	
     ### other tweaks ###
     "RememberOnExplorerRestart",
@@ -142,9 +148,6 @@ $tweaks = @(
     ##
 
     ### UI Tweaks ###
-    "DisableActionCenter",          # "EnableActionCenter",
-    "DisableLockScreen",            # "EnableLockScreen",
-    "DisableLockScreenRS1",       # "EnableLockScreenRS1",
     # "HideNetworkFromLockScreen",    # "ShowNetworkOnLockScreen",
     # "HideShutdownFromLockScreen",   # "ShowShutdownOnLockScreen",
     "DisableStickyKeys",            # "EnableStickyKeys",
@@ -223,10 +226,6 @@ $tweaks = @(
     ##
 
     ### Application Tweaks ###
-    ## Modified by Crapling
-    "DisableOneDrive",				# "EnableOneDrive",
-    "UninstallOneDrive",			# "InstallOneDrive",
-    ##
     "UninstallMsftBloat",           # "InstallMsftBloat",
     "UninstallThirdPartyBloat",     # "InstallThirdPartyBloat",
     # "UninstallWindowsStore",      # "InstallWindowsStore",
@@ -424,6 +423,7 @@ Function EnableWSL {
             InstallLinuxSubsystem
         }else{
 			Write-Warning -Message "Skipping..."
+        }
     }
 }
 
@@ -457,7 +457,7 @@ function AddCmderToContextMenu([String] $InstallPath = "C:\tools\Cmder\Cmder.exe
     }
 }
 
-Function InstallO_OShutup {
+Function InstallOOShutup{
     $Title = ""
     $Message = "To install O&O Shutup use I, otherwise use S to skip"
 	$Options = "&Install", "&Skip"
@@ -476,24 +476,110 @@ Function InstallO_OShutup {
     }
 }
 
-# Uninstall OneNote
+# Uninstall/Install OneNote
 Function UninstallOneNote {
     $Title = ""
-    $Message = "To uninstall OneNote use U, otherwise use S to skip"
-	$Options = "&Uninstall", "&Skip"
+    $Message = "To uninstall OneNote use U, otherwise use I to Install or S to Skip"
+	$Options = "&Uninstall", "&Install", "&Skip"
 
-    $DefaultChoice = 1
+    $DefaultChoice = 2
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 
     if($Result -eq 0){
         Write-Output "Uninstalling OneNote..."
 		Get-AppxPackage "Microsoft.Office.OneNote" | Remove-AppxPackage
-    }else{
+	}elseif ($Result -eq 1){
+    	Get-AppxPackage -AllUsers "Microsoft.Office.OneNote" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+	}else{
         Write-Warning -Message "Skipping..."
     }
 }
 
-# Disable Lock screen
+# Uninstall/Install Whiteboard
+Function UninstallWhiteboard{    
+	$Title = ""
+    $Message = "To uninstall Whiteboard use U, otherwise use I to Install or S to Skip"
+	$Options = "&Uninstall", "&Install", "&Skip"
+
+    $DefaultChoice = 2
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+        Write-Output "Uninstalling Whiteboard..."
+		Get-AppxPackage "Microsoft.Whiteboard" | Remove-AppxPackage
+	}elseif ($Result -eq 1){
+		Get-AppxPackage -AllUsers "Microsoft.Whiteboard" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
+	}else{
+        Write-Warning -Message "Skipping..."
+    }
+}
+
+# Uninstall/Install OneDrive - Not applicable to Server
+Function UninstallOneDrive {
+	$Title = ""
+    $Message = "To uninstall OneDrive use U, otherwise use I to Install or S to Skip"
+	$Options = "&Uninstall", "&Install", "&Skip"
+
+    $DefaultChoice = 2
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+		Write-Output "Uninstalling OneDrive..."
+		Stop-Process -Name "OneDrive" -ErrorAction SilentlyContinue
+		Start-Sleep -s 2
+		$onedrive = "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe"
+		If (!(Test-Path $onedrive)) {
+			$onedrive = "$env:SYSTEMROOT\System32\OneDriveSetup.exe"
+		}
+		Start-Process $onedrive "/uninstall" -NoNewWindow -Wait
+		Start-Sleep -s 2
+		Stop-Process -Name "explorer" -ErrorAction SilentlyContinue
+		Start-Sleep -s 2
+		Remove-Item -Path "$env:USERPROFILE\OneDrive" -Force -Recurse -ErrorAction SilentlyContinue
+		Remove-Item -Path "$env:LOCALAPPDATA\Microsoft\OneDrive" -Force -Recurse -ErrorAction SilentlyContinue
+		Remove-Item -Path "$env:PROGRAMDATA\Microsoft OneDrive" -Force -Recurse -ErrorAction SilentlyContinue
+		Remove-Item -Path "$env:SYSTEMDRIVE\OneDriveTemp" -Force -Recurse -ErrorAction SilentlyContinue
+		If (!(Test-Path "HKCR:")) {
+			New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
+		}
+		Remove-Item -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Recurse -ErrorAction SilentlyContinue
+		Remove-Item -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Recurse -ErrorAction SilentlyContinue
+	}elseif ($Result -eq 1){
+		Write-Output "Installing OneDrive..."
+		$onedrive = "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe"
+		If (!(Test-Path $onedrive)) {
+			$onedrive = "$env:SYSTEMROOT\System32\OneDriveSetup.exe"
+		}
+		Start-Process $onedrive -NoNewWindow
+	}else{
+        Write-Warning -Message "Skipping..."
+    }
+}
+
+# Disable/Enable OneDrive - Not applicable to Server
+Function DisableOneDrive {
+	$Title = ""
+    $Message = "To disable OneDrive use D, otherwise use E to Enable or S to Skip"
+	$Options = "&Disable", "&Enable", "&Skip"
+
+    $DefaultChoice = 2
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+	Write-Output "Disabling OneDrive..."
+	If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive")) {
+		New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" | Out-Null
+	}
+	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -Type DWord -Value 1
+	}elseif ($Result -eq 1){
+		Write-Output "Enabling OneDrive..."
+		Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -ErrorAction SilentlyContinue
+	}else{
+        Write-Warning -Message "Skipping..."
+    }
+}
+
+# Disable/Enable Lock screen
 Function DisableLockScreen {
     $Title = ""
     $Message = "To Disable the LockScreen use D, otherwise use E to Enable or S to Skip"
@@ -521,29 +607,26 @@ Function DisableLockScreen {
 		$action.Path = "reg.exe"
 		$action.Arguments = "add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\SessionData /t REG_DWORD /v AllowLockScreen /d 0 /f"
 		$service.GetFolder("\").RegisterTaskDefinition("Disable LockScreen", $task, 6, "NT AUTHORITY\SYSTEM", $null, 4) | Out-Null
-	elseif($Result -eq 1){
+	}elseif($Result -eq 1){
 		Write-Output "Enabling Lock screen..."
 		Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name "NoLockScreen" -ErrorAction SilentlyContinue
 		# for Windows <= 1803
 		Write-Output "Enabling Lock screen (removing scheduler workaround)..."
 		Unregister-ScheduledTask -TaskName "Disable LockScreen" -Confirm:$false -ErrorAction SilentlyContinue
-	}
 	}else{
         Write-Warning -Message "Skipping..."
     }
 }
-}
 
-
-# Disable Action Center
+# Disable/Enable Action Center
 Function DisableActionCenter {
 	$Title = ""
-    $Message = "To disable the ActionCenter use D, otherwise use S to skip"
-	$Options = "&Disable", "&Skip"
+    $Message = "To disable the ActionCenter use D, otherwise use E to Enable or S to skip"
+	$Options = "&Disable", "&Enable", "&Skip"
 
-    $DefaultChoice = 1
+    $DefaultChoice = 2
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-
+	
     if($Result -eq 0){
 		Write-Output "Disabling Action Center..."
 		If (!(Test-Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer")) {
@@ -551,6 +634,10 @@ Function DisableActionCenter {
 		}
 		Set-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableNotificationCenter" -Type DWord -Value 1
 		Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\PushNotifications" -Name "ToastEnabled" -Type DWord -Value 0
+	} elseif($Result -eq 1){
+		Write-Output "Enabling Action Center..."
+		Remove-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableNotificationCenter" -ErrorAction SilentlyContinue
+		Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\PushNotifications" -Name "ToastEnabled" -Type DWord -Value 1
 	}else{
         Write-Warning -Message "Skipping..."
     }
@@ -1513,41 +1600,6 @@ Function EnableAutoRebootOnCrash {
 # UI Tweaks
 ##########
 
-# Enable Action Center
-Function EnableActionCenter {
-	Write-Output "Enabling Action Center..."
-	Remove-ItemProperty -Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer" -Name "DisableNotificationCenter" -ErrorAction SilentlyContinue
-	Remove-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\PushNotifications" -Name "ToastEnabled" -ErrorAction SilentlyContinue
-}
-
-# Enable Lock screen
-Function EnableLockScreen {
-	Write-Output "Enabling Lock screen..."
-	Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\Personalization" -Name "NoLockScreen" -ErrorAction SilentlyContinue
-}
-
-# Disable Lock screen (Anniversary Update workaround) - Applicable to 1607 - 1803 (The GPO used in DisableLockScreen has been fixed again in 1803)
-Function DisableLockScreenRS1 {
-	Write-Output "Disabling Lock screen using scheduler workaround..."
-	$service = New-Object -com Schedule.Service
-	$service.Connect()
-	$task = $service.NewTask(0)
-	$task.Settings.DisallowStartIfOnBatteries = $false
-	$trigger = $task.Triggers.Create(9)
-	$trigger = $task.Triggers.Create(11)
-	$trigger.StateChange = 8
-	$action = $task.Actions.Create(0)
-	$action.Path = "reg.exe"
-	$action.Arguments = "add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\LogonUI\SessionData /t REG_DWORD /v AllowLockScreen /d 0 /f"
-	$service.GetFolder("\").RegisterTaskDefinition("Disable LockScreen", $task, 6, "NT AUTHORITY\SYSTEM", $null, 4) | Out-Null
-}
-
-# Enable Lock screen (Anniversary Update workaround) - Applicable to 1607 - 1803
-Function EnableLockScreenRS1 {
-	Write-Output "Enabling Lock screen (removing scheduler workaround)..."
-	Unregister-ScheduledTask -TaskName "Disable LockScreen" -Confirm:$false -ErrorAction SilentlyContinue
-}
-
 # Hide network options from Lock Screen
 Function HideNetworkFromLockScreen {
 	Write-Output "Hiding network options from Lock Screen..."
@@ -2456,55 +2508,6 @@ Function ShowShareMenu {
 # Application Tweaks
 ##########
 
-# Disable OneDrive
-Function DisableOneDrive {
-	Write-Output "Disabling OneDrive..."
-	If (!(Test-Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive")) {
-		New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" | Out-Null
-	}
-	Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -Type DWord -Value 1
-}
-
-# Enable OneDrive
-Function EnableOneDrive {
-	Write-Output "Enabling OneDrive..."
-	Remove-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\OneDrive" -Name "DisableFileSyncNGSC" -ErrorAction SilentlyContinue
-}
-
-# Uninstall OneDrive - Not applicable to Server
-Function UninstallOneDrive {
-	Write-Output "Uninstalling OneDrive..."
-	Stop-Process -Name "OneDrive" -ErrorAction SilentlyContinue
-	Start-Sleep -s 2
-	$onedrive = "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe"
-	If (!(Test-Path $onedrive)) {
-		$onedrive = "$env:SYSTEMROOT\System32\OneDriveSetup.exe"
-	}
-	Start-Process $onedrive "/uninstall" -NoNewWindow -Wait
-	Start-Sleep -s 2
-	Stop-Process -Name "explorer" -ErrorAction SilentlyContinue
-	Start-Sleep -s 2
-	Remove-Item -Path "$env:USERPROFILE\OneDrive" -Force -Recurse -ErrorAction SilentlyContinue
-	Remove-Item -Path "$env:LOCALAPPDATA\Microsoft\OneDrive" -Force -Recurse -ErrorAction SilentlyContinue
-	Remove-Item -Path "$env:PROGRAMDATA\Microsoft OneDrive" -Force -Recurse -ErrorAction SilentlyContinue
-	Remove-Item -Path "$env:SYSTEMDRIVE\OneDriveTemp" -Force -Recurse -ErrorAction SilentlyContinue
-	If (!(Test-Path "HKCR:")) {
-		New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT | Out-Null
-	}
-	Remove-Item -Path "HKCR:\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Recurse -ErrorAction SilentlyContinue
-	Remove-Item -Path "HKCR:\Wow6432Node\CLSID\{018D5C66-4533-4307-9B53-224DE2ED1FE6}" -Recurse -ErrorAction SilentlyContinue
-}
-
-# Install OneDrive - Not applicable to Server
-Function InstallOneDrive {
-	Write-Output "Installing OneDrive..."
-	$onedrive = "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe"
-	If (!(Test-Path $onedrive)) {
-		$onedrive = "$env:SYSTEMROOT\System32\OneDriveSetup.exe"
-	}
-	Start-Process $onedrive -NoNewWindow
-}
-
 # Uninstall default Microsoft applications
 Function UninstallMsftBloat {
 	Write-Output "Uninstalling default Microsoft applications..."
@@ -2548,7 +2551,6 @@ Function UninstallMsftBloat {
 	Get-AppxPackage "Microsoft.Todos" | Remove-AppxPackage
 	Get-AppxPackage "Microsoft.Wallet" | Remove-AppxPackage
 	Get-AppxPackage "Microsoft.WebMediaExtensions" | Remove-AppxPackage
-	Get-AppxPackage "Microsoft.Whiteboard" | Remove-AppxPackage
 	Get-AppxPackage "Microsoft.WindowsAlarms" | Remove-AppxPackage
 	Get-AppxPackage "Microsoft.WindowsCamera" | Remove-AppxPackage
 	Get-AppxPackage "microsoft.windowscommunicationsapps" | Remove-AppxPackage
@@ -2601,7 +2603,6 @@ Function InstallMsftBloat {
 	Get-AppxPackage -AllUsers "Microsoft.MSPaint" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.NetworkSpeedTest" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.OfficeLens" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
-	Get-AppxPackage -AllUsers "Microsoft.Office.OneNote" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.Office.Sway" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.OneConnect" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.People" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
@@ -2612,7 +2613,6 @@ Function InstallMsftBloat {
 	Get-AppxPackage -AllUsers "Microsoft.Todos" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.Wallet" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.WebMediaExtensions" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
-	Get-AppxPackage -AllUsers "Microsoft.Whiteboard" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.WindowsAlarms" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.WindowsCamera" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
 	Get-AppxPackage -AllUsers "Microsoft.windowscommunicationsapps" | ForEach-Object {Add-AppxPackage -DisableDevelopmentMode -Register "$($_.InstallLocation)\AppXManifest.xml"}
@@ -3016,8 +3016,6 @@ Function UninstallNET23 {
 	}
 }
 ##
-
-
 
 ##########
 # Server specific Tweaks
