@@ -45,13 +45,14 @@ $tweaks = @(
     ### provide the Option to change default drive for various save locations (for example when using a small ssd as system drive) ###
     "ChangeDefaultUserLibraryDrive",
     "ChangeTempFolderDrive",
+    "DisableHibernation",
 	
 	### External Program Setup
     "InstallChoco", #REQUIRED FOR OTHER PROGRAM INSTALLS!
     "Install7Zip",
     "InstallNotepadplusplus",
 
-    "InstallCmder",
+    "InstallWindowsTerminal",
     "EnableWSL",
     "InstallOOShutup",
 	
@@ -305,34 +306,49 @@ Function InstallChoco {
     Write-Warning -Message "This is required for base programs"
 	$DefaultChoice = 2
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+    $ChocoPath=":\Program Files (x86)\Chocolatey"
+    $ChocoEnv="ChocolateyInstall"
+    $ChocoToolsEnv="ChocolateyToolsLocation"
+    $DoChocoInstall=1
+    $IsChocoInPath=Test-Path -Path "$env:ChocolateyInstall" -ErrorAction SilentlyContinue
 
-	if($Result -eq 1){
-		initDrives
+	if($Result -le 1){
+		if($Result -eq 1){
+        initDrives
 		$Title = "`nSelect the drive where Chocolatey should be installed"
 		$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
-		$New_Location = "${SelectedDrive}:\Program Files (x86)\Chocolatey"
-		if ("$env:ChocolateyInstall" -AND $SelectedDrive -ne $env:ChocolateyInstall.Substring(0,1)) {
+		if ("$env:ChocolateyInstall" -AND $SelectedDrive -ne $env:ChocolateyInstall.Substring(0,1) -and !(Test-Path -Path "${SelectedDrive}$ChocoPath" -ErrorAction SilentlyContinue) -and $IsChocoInPath) {
+            Write-Output "Chocolatey is installed on another drive..."
+            Write-Output "Moving Chocolatey installation to selected drive..."
 			Move-Item -force "$env:ChocolateyInstall" "${SelectedDrive}:\Program Files (x86)"
-		} elseif (!("$env:ChocolateyInstall")) {
-			$Result = 0
-		}
-		[System.Environment]::SetEnvironmentVariable("ChocolateyInstall","${SelectedDrive}:\Program Files (x86)\Chocolatey",[System.EnvironmentVariableTarget]::Machine)
-		Write-Output "Parsing Environment Variable..."
-		# reinit environment variable
-		$env:ChocolateyInstall = [System.Environment]::GetEnvironmentVariable("ChocolateyInstall","Machine")	
-		}
-	if($Result -eq 0){
-		if (!($env:ChocolateyInstall) -or !(Test-Path -Path "$env:ChocolateyInstall" -ErrorAction SilentlyContinue)){
-			Write-Output "Installing Chocolatey..."
-			Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
-			choco install chocolatey-core.extension -y
-			} Else {
-				Write-Output "Chocolatey is already installed, skipping..."
-			}
+            $DoChocoInstall=0
+            }
+         }
+            if(!($SelectedDrive)){
+                $SelectedDrive=((Get-Location).Path.Substring(0,1))
+            }
+        
+		    Write-Output "Parsing Environment Variable..."
+            [System.Environment]::SetEnvironmentVariable("$ChocoToolsEnv", "${SelectedDrive}$ChocoPath\tools" ,[System.EnvironmentVariableTarget]::Machine)
+            [System.Environment]::SetEnvironmentVariable("$ChocoEnv","${SelectedDrive}$ChocoPath",[System.EnvironmentVariableTarget]::Machine)
+            # reinit environment variable
+		    $env:ChocolateyInstall = [System.Environment]::GetEnvironmentVariable("$ChocoEnv","Machine")
+            $env:ChocolateyToolsLocation = [System.Environment]::GetEnvironmentVariable("$ChocoToolsEnv","Machine")
+                
+            if(Test-Path -Path "${SelectedDrive}$ChocoPath"){
+                Write-Output "Chocolatey is already installed, skipping installation..."
+                $DoChocoInstall=0
+            }
+
+            if($DoChocoInstall -eq 1){
+                Write-Output "Installing Chocolatey..."
+			    Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+			    choco install chocolatey-core.extension -y
+            }
 		}else{
-		Write-Warning -Message "Skipping..."
-		if(!(Test-Path env:ChocolateyInstall)){		
-			$global:DontInstallProgs=1
+		    Write-Warning -Message "Skipping..."
+		    if(!(Test-Path "$env:ChocolateyInstall")){		
+			    $global:DontInstallProgs=1
 		}
 	}
 }
@@ -371,43 +387,24 @@ Function InstallNotepadplusplus {
 	}
 }
 
-Function InstallCmder {
+Function InstallWindowsTerminal {
 	if($global:DontInstallProgs -eq 0){
 		$Title = ""
-		$Message = "To Install Cmder hit I or R to also change the installation drive, otherwise use S to skip"
-		$Options = "&Install", "&Skip", "&RelocateAndInstall"
+		$Message = "To Install Windows Terminal hit I, otherwise use S to skip"
+		$Options = "&Install", "&Skip"
 		
 		$DefaultChoice = 1
 		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 
-        $InstallDir
-
-		if($Result -eq 2){
-			initDrives
-			$Title = "`nSelect the drive where Cmder should be installed"
-			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
-            $InstallDir = "${SelectedDrive}:\Chocolatey\tools"
-			[System.Environment]::SetEnvironmentVariable("ChocolateyToolsLocation", $InstallDir,[System.EnvironmentVariableTarget]::Machine)
-			Write-Output "Parsing Environment Variable..."
-			# reinit environment variable
-			$env:ChocolateyToolsLocation = [System.Environment]::GetEnvironmentVariable("ChocolateyToolsLocation","Machine")
-		    
-            AddCmderToContextMenu "$InstallDir\Cmder\Cmder.exe"
-            
-            Write-Output "Installing Cmder..."
-			choco install cmder -y
-        }elseif ($Result -eq 0){
-            AddCmderToContextMenu                
-
-            [System.Environment]::SetEnvironmentVariable("ChocolateyToolsLocation", "C:\tools",[System.EnvironmentVariableTarget]::Machine)
-            $env:ChocolateyToolsLocation = [System.Environment]::GetEnvironmentVariable("ChocolateyToolsLocation","Machine")
-
-			Write-Output "Installing Cmder..."
-			choco install cmder -y
+        if ($Result -eq 0){
+            AddWinTermToContextMenu
+			Write-Output "Installing Windows Terminal..."
+			choco install microsoft-windows-terminal -y
+            InstallCustomWinTermCfg
 		}else{
 			Write-Warning -Message "Skipping..."
-		}
 	}
+    }
 }
 
 Function EnableWSL {
@@ -428,21 +425,24 @@ Function EnableWSL {
 }
 
 #add to shift + right click context menu
-function AddCmderToContextMenu([String] $InstallPath = "C:\tools\Cmder\Cmder.exe"){
+function AddWinTermToContextMenu(){
     $Title = ""
-    $Message = "To Install Cmder to the shift + right click context menu use A, otherwise use S to skip"
+    $Message = "To add Windows Terminal to the shift + right click context menu use A, otherwise use S to skip"
 	$Options = "&Add", "&Skip"
 
     $DefaultChoice = 0
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+# Config: ${((Get-Location).Path.Substring(0,1)}:\Users\$(whoami | ForEach-Object {$_.split("\")[1]})\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState
+    
+    $InstallPath = ""
 
     if($Result -eq 0){
 	
 	New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
 
-    $RegPath = "HKCR:\Directory\Background\shell\Open Cmder here"
+    $RegPath = "HKCR:\Directory\Background\shell\Open Windows Terminal here"
 
-    Write-Output "Adding Cmder to context menu..."
+    Write-Output "Adding Windows Terminal to context menu..."
     if(!(Test-Path $RegPath)){
         New-Item -Path $RegPath
     }
@@ -451,9 +451,32 @@ function AddCmderToContextMenu([String] $InstallPath = "C:\tools\Cmder\Cmder.exe
     if(!(Test-Path "$RegPath\command")){
         New-Item -Path "$RegPath\command"
     }
-        Set-ItemProperty -Path "$RegPath\command" -Name ‘(Default)’ -Value $InstallPath
+        Set-ItemProperty -Path "$RegPath\command" -Name ‘(Default)’ -Value "wt"
     }else{
         Write-Warning -Message "Skipping..."
+    }
+}
+
+# adding my custom configuration to path
+Function InstallCustomWinTermCfg([String] $InstallLoc="$((Get-Location).Path.Substring(0,1))" + ":\Users\" + "$(whoami | ForEach-Object {$_.split("\")[1]})" + "\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState") {
+    if($global:DontInstallProgs -eq 0){
+		$Title = ""
+		$Message = "To Inject the custom configuration for Windows Terminal hit I or use S to skip"
+		$Options = "&Inject", "&Skip"
+		
+		$DefaultChoice = 1
+		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+        
+        if($Result -eq 0){
+        if (!(Test-Path -Path "$InstallLoc" -ErrorAction SilentlyContinue)){
+            Write-Output "$InstallLoc"
+            New-Item "$InstallLoc" -ItemType Directory -ErrorAction SilentlyContinue
+        }
+        Write-Output "Copying settings..."
+        Start-BitsTransfer -Source "https://raw.githubusercontent.com/Crapling/Win10Setup-Debloat/master/windowsterminal/settings.json" -Destination "$InstallLoc\settings.json" -Force
+        }else{
+            Write-Warning -Message "Skipping..."
+        }
     }
 }
 
@@ -641,6 +664,37 @@ Function DisableActionCenter {
 	}else{
         Write-Warning -Message "Skipping..."
     }
+}
+
+# Disable Hibernation
+Function DisableHibernation {
+	$Title = ""
+    $Message = "To disable the Hibernation use D, otherwise use E to Enable or S to skip"
+	$Options = "&Disable", "&Enable", "&Skip"
+
+    $DefaultChoice = 2
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+    	Write-Output "Disabling Hibernation..."
+	    powercfg -h off
+	    Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernteEnabled" -Type Dword -Value 0
+	    If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings")) {
+		    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" | Out-Null
+	    }
+	    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" -Name "ShowHibernateOption" -Type Dword -Value 0
+	} elseif ($Result -eq 1){
+		Write-Output "Enabling Hibernation..."
+		powercfg -h on	
+        Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernteEnabled" -Type Dword -Value 1
+	    If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings")) {
+		    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" | Out-Null
+	    }
+	    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" -Name "ShowHibernateOption" -Type Dword -Value 1
+	} else {
+	    Write-Warning -Message "Skipping..."
+	}
+
 }
 ##
 
@@ -1495,26 +1549,6 @@ Function SetBIOSTimeUTC {
 Function SetBIOSTimeLocal {
 	Write-Output "Setting BIOS time to Local time..."
 	Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\TimeZoneInformation" -Name "RealTimeIsUniversal" -ErrorAction SilentlyContinue
-}
-
-# Enable Hibernation - Do not use on Server with automatically started Hyper-V hvboot service as it may lead to BSODs (Win10 with Hyper-V is fine)
-Function EnableHibernation {
-	Write-Output "Enabling Hibernation..."
-	Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernteEnabled" -Type Dword -Value 1
-	If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings")) {
-		New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" | Out-Null
-	}
-	Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" -Name "ShowHibernateOption" -Type Dword -Value 1
-}
-
-# Disable Hibernation
-Function DisableHibernation {
-	Write-Output "Disabling Hibernation..."
-	Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernteEnabled" -Type Dword -Value 0
-	If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings")) {
-		New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" | Out-Null
-	}
-	Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" -Name "ShowHibernateOption" -Type Dword -Value 0
 }
 
 # Disable Sleep start menu and keyboard button
