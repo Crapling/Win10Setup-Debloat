@@ -473,7 +473,7 @@ Function InstallCustomWinTermCfg([String] $InstallLoc="$((Get-Location).Path.Sub
             New-Item "$InstallLoc" -ItemType Directory -ErrorAction SilentlyContinue
         }
         Write-Output "Copying settings..."
-        Start-BitsTransfer -Source "https://raw.githubusercontent.com/Crapling/Win10Setup-Debloat/master/windowsterminal/settings.json" -Destination "$InstallLoc\settings.json" -Force
+        Start-BitsTransfer -Source "https://raw.githubusercontent.com/Crapling/Win10Setup-Debloat/master/windowsterminal/settings.json" -Destination "$InstallLoc\settings.json"
         }else{
             Write-Warning -Message "Skipping..."
         }
