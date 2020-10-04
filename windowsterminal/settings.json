@@ -34,8 +34,8 @@
 			"cursorColor":"#f39660",
 			"largePasteWarning":"false",
 			"cursorShape":"vintage",
-			"multiLinePasteWarning":"false"
-			
+			"multiLinePasteWarning":"false",
+			"startingDirectory": "."
 		},
         "list":
         [
