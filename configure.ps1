@@ -58,7 +58,8 @@ $tweaks = @(
 	
 	### Application Tweaks ###
 	"UninstallOneNote",
-	"UninstallWhiteboard",				
+	"UninstallWhiteboard",
+    "RemOneDriveContextMenu",				
     "UninstallOneDrive",
     "DisableOneDrive",
 	
@@ -397,10 +398,10 @@ Function InstallWindowsTerminal {
 		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 
         if ($Result -eq 0){
-            AddWinTermToContextMenu
 			Write-Output "Installing Windows Terminal..."
 			choco install microsoft-windows-terminal -y
-            InstallCustomWinTermCfg
+            AddWinTermToContextMenu
+            InstallCustomWinTermCfgPrompt
 		}else{
 			Write-Warning -Message "Skipping..."
 	}
@@ -459,7 +460,13 @@ function AddWinTermToContextMenu(){
 
 # adding my custom configuration to path
 Function InstallCustomWinTermCfg([String] $InstallLoc="$((Get-Location).Path.Substring(0,1))" + ":\Users\" + "$(whoami | ForEach-Object {$_.split("\")[1]})" + "\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState") {
-    if($global:DontInstallProgs -eq 0){
+        if (!(Test-Path -Path "$InstallLoc" -ErrorAction SilentlyContinue)){
+            New-Item "$InstallLoc" -ItemType Directory -ErrorAction SilentlyContinue
+        }
+        Start-BitsTransfer -Source "https://raw.githubusercontent.com/Crapling/Win10Setup-Debloat/master/windowsterminal/settings.json" -Destination "$InstallLoc\settings.json"
+    }
+
+Function InstallCustomWinTermCfgPrompt {
 		$Title = ""
 		$Message = "To Inject the custom configuration for Windows Terminal hit I or use S to skip"
 		$Options = "&Inject", "&Skip"
@@ -468,17 +475,13 @@ Function InstallCustomWinTermCfg([String] $InstallLoc="$((Get-Location).Path.Sub
 		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
         
         if($Result -eq 0){
-        if (!(Test-Path -Path "$InstallLoc" -ErrorAction SilentlyContinue)){
-            Write-Output "$InstallLoc"
-            New-Item "$InstallLoc" -ItemType Directory -ErrorAction SilentlyContinue
-        }
-        Write-Output "Copying settings..."
-        Start-BitsTransfer -Source "https://raw.githubusercontent.com/Crapling/Win10Setup-Debloat/master/windowsterminal/settings.json" -Destination "$InstallLoc\settings.json"
+            Write-Output "Copying settings..."
+            InstallCustomWinTermCfg
+            InstallCustomWinTermCfg("$((Get-Location).Path.Substring(0,1)):\Users\$(whoami | ForEach-Object {$_.split("\")[1]})\AppData\Local\Microsoft\Windows Terminal")
         }else{
             Write-Warning -Message "Skipping..."
         }
     }
-}
 
 Function InstallOOShutup{
     $Title = ""
@@ -574,6 +577,31 @@ Function UninstallOneDrive {
 			$onedrive = "$env:SYSTEMROOT\System32\OneDriveSetup.exe"
 		}
 		Start-Process $onedrive -NoNewWindow
+	}else{
+        Write-Warning -Message "Skipping..."
+    }
+}
+
+Function RemOneDriveContextMenu {
+	$Title = ""
+    $Message = "To remove OneDrive context menu entries use R, otherwise use A to Add them or S to Skip"
+	$Options = "&Remove", "&Add", "&Skip"
+
+    $DefaultChoice = 2
+	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
+
+    if($Result -eq 0){
+	    Write-Output "Removing OneDrive context menu entry..."
+	    If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked")) {
+		    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked" | Out-Null
+	    }
+	    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked" -Name "{CB3D0F55-BC2C-4C1A-85ED-23ED75B5106B}" -Type String -Value ""
+	}elseif ($Result -eq 1){
+		Write-Output "Adding OneDrive context menu entry..."
+	    If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked")) {
+		    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked" | Out-Null
+	    }
+	    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked" -Name "{CB3D0F55-BC2C-4C1A-85ED-23ED75B5106B}" -Type String -Value "-"
 	}else{
         Write-Warning -Message "Skipping..."
     }
