@@ -455,7 +455,7 @@ function AddWinTermToContextMenu{
 
         Remove-Item -Path "HKCR:\Directory\Background\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
         Remove-Item -Path "HKCR:\Directory\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCR:\Drive\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue	
+        Remove-Item -Path "HKCR:\Drive\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
     }elseif($Result -eq 1){
 		Remove-Item -Path "$RegPath" -Recurse -ErrorAction SilentlyContinue
     }else{
