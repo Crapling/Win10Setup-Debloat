@@ -426,22 +426,21 @@ Function EnableWSL {
 }
 
 #add to shift + right click context menu
-function AddWinTermToContextMenu(){
+function AddWinTermToContextMenu{
     $Title = ""
-    $Message = "To add Windows Terminal to the shift + right click context menu use A, otherwise use S to skip"
-	$Options = "&Add", "&Skip"
+    $Message = "To add Windows Terminal to the shift + right click context menu use A, otherwise use R to remove entry from context menu or use S to skip"
+	$Options = "&Add", "&Remove", "&Skip"
 
     $DefaultChoice = 0
+    Write-Warning "This will replace other shift right click menus from other console hosts!"
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-# Config: ${((Get-Location).Path.Substring(0,1)}:\Users\$(whoami | ForEach-Object {$_.split("\")[1]})\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState
     
     $InstallPath = ""
 
-    if($Result -eq 0){
-	
-	New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
-
     $RegPath = "HKCR:\Directory\Background\shell\Open Windows Terminal here"
+    New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
+
+    if($Result -eq 0){
 
     Write-Output "Adding Windows Terminal to context menu..."
     if(!(Test-Path $RegPath)){
@@ -452,7 +451,13 @@ function AddWinTermToContextMenu(){
     if(!(Test-Path "$RegPath\command")){
         New-Item -Path "$RegPath\command"
     }
-        Set-ItemProperty -Path "$RegPath\command" -Name ‘(Default)’ -Value "wt"
+        Set-ItemProperty -Path "$RegPath\command" -Name ‘(Default)’ -Value 'wt.exe -d "%V"'
+
+        Remove-Item -Path "HKCR:\Directory\Background\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCR:\Directory\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -Path "HKCR:\Drive\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue	
+    }elseif($Result -eq 1){
+		Remove-Item -Path "$RegPath" -Recurse -ErrorAction SilentlyContinue
     }else{
         Write-Warning -Message "Skipping..."
     }
