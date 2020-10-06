@@ -431,7 +431,6 @@ function AddWinTermToContextMenu{
 	$Options = "&Add", "&Remove", "&Skip"
 
     $DefaultChoice = 0
-    Write-Warning "This will replace other shift right click menus from other console hosts!"
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 
     $InstallPath = ""
@@ -451,10 +450,6 @@ function AddWinTermToContextMenu{
         New-Item -Path "$RegPath\command"
     }
         Set-ItemProperty -Path "$RegPath\command" -Name ‘(Default)’ -Value 'wt.exe -d "%V"'
-
-        Remove-Item -Path "HKCR:\Directory\Background\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCR:\Directory\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCR:\Drive\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
     }elseif($Result -eq 1){
 		Remove-Item -Path "$RegPath" -Recurse -ErrorAction SilentlyContinue
     }else{
