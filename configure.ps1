@@ -1635,12 +1635,14 @@ Function EnableFastStartup {
 Function EnableClipboardHistory {
 	Write-Output "Enabling Clipboard History..."
 	Set-ItemProperty -Path "HKCU:\Software\Microsoft\Clipboard" -Name "EnableClipboardHistory" -Type DWord -Value 1
+   Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowClipboardHistory" -Type DWord -Value 1
 }
 
 # Disable Clipboard History - Applicable since 1809. Not applicable to Server
 Function DisableClipboardHistory {
 	Write-Output "Disabling Clipboard History..."
 	Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Clipboard" -Name "EnableClipboardHistory" -ErrorAction SilentlyContinue
+   Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowClipboardHistory" -Type DWord -Value 0
 }
 
 # Disable automatic reboot on crash (BSOD)
