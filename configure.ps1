@@ -7,10 +7,10 @@
 ## Modified by Crapling
 ## Additional Tweaks source: https://github.com/farag2/Windows-10-Setup-Script
 #
-#    If you're a power user looking to tweak your machinea, or doing larger roll-out.. 
+#    If you're a power user looking to tweak your machinea, or doing larger roll-out..
 #    Use the @Disassembler0 script instead. It'll probably be more up-to-date than mine:
 #    https://github.com/Disassembler0/Win10-Initial-Setup-Script
-# 
+#
 #    Note from author: Never run scripts without reading them & understanding what they do.
 #
 #	Chris Titus Additions:
@@ -23,12 +23,12 @@
 #	- Added Debloat Microsoft Store Apps
 #
 #   Crapling Additions:
-#   
+#
 #	- creating registry backup
-#   - Change default location of Program Files, Program Files (x86) and Temp 
+#   - Change default location of Program Files, Program Files (x86) and Temp
 #   - added prompts for program installation
 #	- added programs to install
-#   
+#
 #
 ##########
 
@@ -46,27 +46,27 @@ $tweaks = @(
     "ChangeDefaultUserLibraryDrive",
     "ChangeTempFolderDrive",
     "DisableHibernation",
-	
+
 	### External Program Setup
     "InstallChoco", #REQUIRED FOR OTHER PROGRAM INSTALLS!
     "Install7Zip",
     "InstallNotepadplusplus",
 
-    "InstallWindowsTerminal",
     "EnableWSL",
+    "InstallWindowsTerminal",
     "InstallOOShutup",
-	
+
 	### Application Tweaks ###
 	"UninstallOneNote",
 	"UninstallWhiteboard",
-    "RemOneDriveContextMenu",				
+    "RemOneDriveContextMenu",
     "UninstallOneDrive",
     "DisableOneDrive",
-	
+
 	### UI Tweaks ###
     "DisableActionCenter",
-    "DisableLockScreen", 
-	
+    "DisableLockScreen",
+
     ### other tweaks ###
     "RememberOnExplorerRestart",
     "EnableRegistryBackup",
@@ -117,7 +117,7 @@ $tweaks = @(
     # "EnableCIMemoryIntegrity",    # "DisableCIMemoryIntegrity",
     #"DisableScriptHost",            # "EnableScriptHost",
     #"EnableDotNetStrongCrypto",     # "DisableDotNetStrongCrypto",
-    "EnableMeltdownCompatFlag", 	# "DisableMeltdownCompatFlag",      
+    "EnableMeltdownCompatFlag", 	# "DisableMeltdownCompatFlag",
 
     ### Service Tweaks ###
     ## Modified by Crapling
@@ -136,10 +136,9 @@ $tweaks = @(
     "DisableSuperfetch",          # "EnableSuperfetch",
     "EnableIndexing",
     "SetBIOSTimeUTC",             # "SetBIOSTimeLocal",
-    "DisableHibernation",		# "EnableHibernation",
     #"DisableUpdateMSProducts",	  # "EnableUpdateMSProducts",
-    ## Modified by Crapling 
-    "DisableSleepButton",		  # "EnableSleepButton",         
+    ## Modified by Crapling
+    "DisableSleepButton",		  # "EnableSleepButton",
     ##
     "DisableSleepTimeout",        # "EnableSleepTimeout",
     "DisableFastStartup",         # "EnableFastStartup",
@@ -155,13 +154,13 @@ $tweaks = @(
     "DisableStickyKeys",            # "EnableStickyKeys",
     "ShowTaskManagerDetails"        # "HideTaskManagerDetails",
     "ShowFileOperationsDetails",    # "HideFileOperationsDetails",
-    "DisableFileDeleteConfirm",	# "EnableFileDeleteConfirm",    
+    "DisableFileDeleteConfirm",	# "EnableFileDeleteConfirm",
     #"HideTaskbarSearch",
     "ShowTaskbarSearchIcon",      # "ShowTaskbarSearchBox",
     "HideTaskView",                 # "ShowTaskView",
     # "ShowSmallTaskbarIcons",        # "ShowLargeTaskbarIcons",
     ## Modified by Crapling
-    "SetTaskbarCombineAlways",		# "SetTaskbarCombineWhenFull",    # "SetTaskbarCombineNever",     
+    "SetTaskbarCombineAlways",		# "SetTaskbarCombineWhenFull",    # "SetTaskbarCombineNever",
     "HideTaskbarPeopleIcon",        # "ShowTaskbarPeopleIcon",
     "HideTrayIcons",				#"ShowTrayIcons",
     ##
@@ -174,7 +173,7 @@ $tweaks = @(
     # "AddENKeyboard",              # "RemoveENKeyboard",
     "EnableNumlock",             	# "DisableNumlock",
     "EnableDarkMode",				# "DisableDarkMode",
-    
+
     ## Modified by Crapling
     "Stop-EdgePDF",
     "HideDefenderTrayIcon",			# "ShowDefenderTrayIcon",
@@ -262,11 +261,11 @@ $tweaks = @(
     # "DisableCtrlAltDelLogin",     # "EnableCtrlAltDelLogin",
     # "DisableIEEnhancedSecurity",  # "EnableIEEnhancedSecurity",
     # "EnableAudio",                # "DisableAudio",
-	
+
 	### Unpinning ###
     "UnpinStartMenuTiles",
     "UnpinTaskbarIcons",
-	
+
 	##Modified by Crapling
 	"PinControlPanelToStart",
     ### provide the Option to change default installation drive (for example when using a small ssd as system drive) ###
@@ -328,14 +327,14 @@ Function InstallChoco {
             if(!($SelectedDrive)){
                 $SelectedDrive=((Get-Location).Path.Substring(0,1))
             }
-        
+
 		    Write-Output "Parsing Environment Variable..."
             [System.Environment]::SetEnvironmentVariable("$ChocoToolsEnv", "${SelectedDrive}$ChocoPath\tools" ,[System.EnvironmentVariableTarget]::Machine)
             [System.Environment]::SetEnvironmentVariable("$ChocoEnv","${SelectedDrive}$ChocoPath",[System.EnvironmentVariableTarget]::Machine)
             # reinit environment variable
 		    $env:ChocolateyInstall = [System.Environment]::GetEnvironmentVariable("$ChocoEnv","Machine")
             $env:ChocolateyToolsLocation = [System.Environment]::GetEnvironmentVariable("$ChocoToolsEnv","Machine")
-                
+
             if(Test-Path -Path "${SelectedDrive}$ChocoPath"){
                 Write-Output "Chocolatey is already installed, skipping installation..."
                 $DoChocoInstall=0
@@ -348,7 +347,7 @@ Function InstallChoco {
             }
 		}else{
 		    Write-Warning -Message "Skipping..."
-		    if(!(Test-Path "$env:ChocolateyInstall")){		
+		    if(!(Test-Path "$env:ChocolateyInstall")){
 			    $global:DontInstallProgs=1
 		}
 	}
@@ -359,7 +358,7 @@ Function Install7Zip {
 		$Title = ""
 		$Message = "To Install 7zip hit I otherwise use S to skip"
 		$Options = "&Install", "&Skip"
-		
+
 		$DefaultChoice = 1
 		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 		if($Result -eq 0){
@@ -376,7 +375,7 @@ Function InstallNotepadplusplus {
 		$Title = ""
 		$Message = "To Install Notepad++ hit I otherwise use S to skip"
 		$Options = "&Install", "&Skip"
-		
+
 		$DefaultChoice = 1
 		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 		if($Result -eq 0){
@@ -393,7 +392,7 @@ Function InstallWindowsTerminal {
 		$Title = ""
 		$Message = "To Install Windows Terminal hit I, otherwise use S to skip"
 		$Options = "&Install", "&Skip"
-		
+
 		$DefaultChoice = 1
 		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 
@@ -413,7 +412,7 @@ Function EnableWSL {
 		$Title = ""
 		$Message = "To Enable WSL hit E or use S to skip"
 		$Options = "&Enable", "&Skip"
-		
+
 		$DefaultChoice = 1
 		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
 
@@ -432,9 +431,8 @@ function AddWinTermToContextMenu{
 	$Options = "&Add", "&Remove", "&Skip"
 
     $DefaultChoice = 0
-    Write-Warning "This will replace other shift right click menus from other console hosts!"
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-    
+
     $InstallPath = ""
 
     $RegPath = "HKCR:\Directory\Background\shell\Open Windows Terminal here"
@@ -452,10 +450,6 @@ function AddWinTermToContextMenu{
         New-Item -Path "$RegPath\command"
     }
         Set-ItemProperty -Path "$RegPath\command" -Name ‘(Default)’ -Value 'wt.exe -d "%V"'
-
-        Remove-Item -Path "HKCR:\Directory\Background\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCR:\Directory\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "HKCR:\Drive\shell\WSL" -Recurse -Force -ErrorAction SilentlyContinue
     }elseif($Result -eq 1){
 		Remove-Item -Path "$RegPath" -Recurse -ErrorAction SilentlyContinue
     }else{
@@ -475,10 +469,10 @@ Function InstallCustomWinTermCfgPrompt {
 		$Title = ""
 		$Message = "To Inject the custom configuration for Windows Terminal hit I or use S to skip"
 		$Options = "&Inject", "&Skip"
-		
+
 		$DefaultChoice = 1
 		$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-        
+
         if($Result -eq 0){
             Write-Output "Copying settings..."
             InstallCustomWinTermCfg
@@ -527,7 +521,7 @@ Function UninstallOneNote {
 }
 
 # Uninstall/Install Whiteboard
-Function UninstallWhiteboard{    
+Function UninstallWhiteboard{
 	$Title = ""
     $Message = "To uninstall Whiteboard use U, otherwise use I to Install or S to Skip"
 	$Options = "&Uninstall", "&Install", "&Skip"
@@ -682,7 +676,7 @@ Function DisableActionCenter {
 
     $DefaultChoice = 2
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
     if($Result -eq 0){
 		Write-Output "Disabling Action Center..."
 		If (!(Test-Path "HKCU:\SOFTWARE\Policies\Microsoft\Windows\Explorer")) {
@@ -718,7 +712,7 @@ Function DisableHibernation {
 	    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" -Name "ShowHibernateOption" -Type Dword -Value 0
 	} elseif ($Result -eq 1){
 		Write-Output "Enabling Hibernation..."
-		powercfg -h on	
+		powercfg -h on
         Set-ItemProperty -Path "HKLM:\System\CurrentControlSet\Control\Session Manager\Power" -Name "HibernteEnabled" -Type Dword -Value 1
 	    If (!(Test-Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings")) {
 		    New-Item -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\FlyoutMenuSettings" | Out-Null
@@ -1305,7 +1299,7 @@ Function EnableCIMemoryIntegrity {
 	Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" -Name "Enabled" -Type DWord -Value 1
 }
 
-# Disable Core Isolation Memory Integrity - 
+# Disable Core Isolation Memory Integrity -
 Function DisableCIMemoryIntegrity {
 	Write-Output "Disabling Core Isolation Memory Integrity..."
 	Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard\Scenarios\HypervisorEnforcedCodeIntegrity" -Name "Enabled" -ErrorAction SilentlyContinue
@@ -1641,12 +1635,14 @@ Function EnableFastStartup {
 Function EnableClipboardHistory {
 	Write-Output "Enabling Clipboard History..."
 	Set-ItemProperty -Path "HKCU:\Software\Microsoft\Clipboard" -Name "EnableClipboardHistory" -Type DWord -Value 1
+   Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowClipboardHistory" -Type DWord -Value 1
 }
 
 # Disable Clipboard History - Applicable since 1809. Not applicable to Server
 Function DisableClipboardHistory {
 	Write-Output "Disabling Clipboard History..."
 	Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Clipboard" -Name "EnableClipboardHistory" -ErrorAction SilentlyContinue
+   Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\System" -Name "AllowClipboardHistory" -Type DWord -Value 0
 }
 
 # Disable automatic reboot on crash (BSOD)
@@ -2530,7 +2526,7 @@ Function HideGiveAccessToMenu {
 	Remove-Item -Path "HKCR:\Directory\Background\shellex\ContextMenuHandlers\Sharing" -ErrorAction SilentlyContinue
 	Remove-Item -Path "HKCR:\Directory\shellex\ContextMenuHandlers\Sharing" -ErrorAction SilentlyContinue
 	Remove-Item -Path "HKCR:\Drive\shellex\ContextMenuHandlers\Sharing" -ErrorAction SilentlyContinue
-	
+
 }
 
 # Show 'Give access to' (until 1703 'Share With') context menu item.
@@ -2911,7 +2907,7 @@ Function InstallHyperV {
 		    Install-WindowsFeature -Name "Hyper-V" -IncludeManagementTools -WarningAction SilentlyContinue | Out-Null
 		    } Else {
         If ([System.Environment]::OSVersion.Version.Build -ge 15063 -And [System.Environment]::OSVersion.Version.Build -le 18363) {
-		    Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null 
+		    Enable-WindowsOptionalFeature -Online -FeatureName "Microsoft-Hyper-V-All" -NoRestart -WarningAction SilentlyContinue | Out-Null
         } Else {
                 dism.exe /online /enable-feature /featurename:Microsoft-Hyper-V /all /norestart
         }
@@ -3252,7 +3248,7 @@ Function UnpinTaskbarIcons {
 	$Options = "&Unpin", "&Skip"
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-    
+
     if($Result -eq 0){
 	Write-Output "Unpinning all Taskbar icons...`n"
 	Set-ItemProperty -Path "HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Taskband" -Name "Favorites" -Type Binary -Value ([byte[]](255))
@@ -3310,38 +3306,38 @@ Function DisableDarkMode {
 ##########
 
 Function Stop-EdgePDF {
-    
-    #Stops edge from taking over as the default .PDF viewer    
+
+    #Stops edge from taking over as the default .PDF viewer
     Write-Output "Stopping Edge from taking over as the default .PDF viewer..."
-	
+
 	New-PSDrive -Name HKCR -PSProvider Registry -Root HKEY_CLASSES_ROOT
-    
+
 	$NoPDF = "HKCR:\.pdf"
     $NoProgids = "HKCR:\.pdf\OpenWithProgids"
-    $NoWithList = "HKCR:\.pdf\OpenWithList" 
+    $NoWithList = "HKCR:\.pdf\OpenWithList"
     If (!(Get-ItemProperty -Path $NoPDF  NoOpenWith)) {
-        New-ItemProperty -Path $NoPDF NoOpenWith 
-	}        
+        New-ItemProperty -Path $NoPDF NoOpenWith
+	}
     If (!(Get-ItemProperty -Path $NoPDF  NoStaticDefaultVerb)) {
-        New-ItemProperty -Path $NoPDF  NoStaticDefaultVerb 
-	}        
+        New-ItemProperty -Path $NoPDF  NoStaticDefaultVerb
+	}
     If (!(Get-ItemProperty -Path $NoProgids  NoOpenWith)) {
-        New-ItemProperty -Path $NoProgids  NoOpenWith 
-	}        
+        New-ItemProperty -Path $NoProgids  NoOpenWith
+	}
     If (!(Get-ItemProperty -Path $NoProgids  NoStaticDefaultVerb)) {
-        New-ItemProperty -Path $NoProgids  NoStaticDefaultVerb 
-	}        
+        New-ItemProperty -Path $NoProgids  NoStaticDefaultVerb
+	}
     If (!(Get-ItemProperty -Path $NoWithList  NoOpenWith)) {
         New-ItemProperty -Path $NoWithList  NoOpenWith
-	}        
-    If (!(Get-ItemProperty -Path $NoWithList  NoStaticDefaultVerb)) {
-        New-ItemProperty -Path $NoWithList  NoStaticDefaultVerb 
 	}
-	
+    If (!(Get-ItemProperty -Path $NoWithList  NoStaticDefaultVerb)) {
+        New-ItemProperty -Path $NoWithList  NoStaticDefaultVerb
+	}
+
     #Appends an underscore '_' to the Registry key for Edge
     $Edge = "HKCR:\AppXd4nrz8ff68srnhf9t5a8sbjyar1cr723_"
     If (Test-Path $Edge) {
-        Set-Item $Edge AppXd4nrz8ff68srnhf9t5a8sbjyar1cr723_ 
+        Set-Item $Edge AppXd4nrz8ff68srnhf9t5a8sbjyar1cr723_
 	}
 }
 
@@ -3352,9 +3348,9 @@ Function CreateRestorePoint {
 }
 
 Function DebloatAll {
-	
+
     $Bloatware = @(
-	
+
 	#Unnecessary Windows 10 AppX Apps
 	"Microsoft.BingNews"
 	"Microsoft.GetHelp"
@@ -3379,7 +3375,7 @@ Function DebloatAll {
 	"Microsoft.WindowsSoundRecorder"
 	"Microsoft.ZuneMusic"
 	"Microsoft.ZuneVideo"
-	
+
 	#Sponsored Windows 10 AppX Apps
 	#Add sponsored/featured apps to remove in the "*AppName*" format
 	"*EclipseManager*"
@@ -3398,7 +3394,7 @@ Function DebloatAll {
 	"*Sway*"
 	"*Speed Test*"
 	"*Dolby*"
-	
+
 	#Optional: Typically not removed but you can if you need to for some reason
 	#"*Microsoft.Advertising.Xaml_10.1712.5.0_x64__8wekyb3d8bbwe*"
 	#"*Microsoft.Advertising.Xaml_10.1712.5.0_x86__8wekyb3d8bbwe*"
@@ -3498,15 +3494,15 @@ function PinControlPanelToStart {
 			}
 		}
 	}
-	
+
 	if ($syspin -eq $true)
 	{
 		# Pin "Control Panel" to Start
 		$Items = (New-Object -ComObject Shell.Application).NameSpace("shell:::{4234d49b-0245-4df3-b780-3893943456e1}").Items()
 		$ControlPanelLocalizedName = ($Items | Where-Object -FilterScript {$_.Path -eq "Microsoft.Windows.ControlPanel"}).Name
-		
+
 		Write-Verbose -Message "`"$ControlPanelLocalizedName`" shortcut is being pinned to Start" -Verbose
-		
+
 		# Check whether the Control Panel shortcut was ever pinned
 		if (Test-Path -Path "$env:APPDATA\Microsoft\Windows\Start menu\Programs\$ControlPanelLocalizedName.lnk")
 		{
@@ -3522,7 +3518,7 @@ $Arguments = @"
 			$Shortcut = $Shell.CreateShortcut("$env:SystemRoot\System32\$ControlPanelLocalizedName.lnk")
 			$Shortcut.TargetPath = "$env:SystemRoot\System32\control.exe"
 			$Shortcut.Save()
-			
+
 $Arguments = @"
 "$env:SystemRoot\System32\$ControlPanelLocalizedName.lnk" "51201"
 "@
@@ -3554,18 +3550,18 @@ function ShowMenu
 	[Parameter()]
 	[string]
 	$Title,
-	
+
 	[Parameter(Mandatory = $true)]
 	[array]
 	$Menu,
-	
+
 	[Parameter(Mandatory = $true)]
 	[int]
 	$Default
 	)
-	
+
 	Write-Information -MessageData $Title -InformationAction Continue
-	
+
 	$minY = [Console]::CursorTop
 	$y = [Math]::Max([Math]::Min($Default, $Menu.Count), 0)
 	do
@@ -3585,7 +3581,7 @@ function ShowMenu
 			}
 			$i++
 		}
-		
+
 		$k = [Console]::ReadKey()
 		switch ($k.Key)
 		{
@@ -3615,7 +3611,7 @@ function ShowMenu
 # Change location of the various folders
 function UserShellFolder
 {
-	
+
 	<#
 		.SYNOPSIS
 		Change location of the each user folders using SHSetKnownFolderPath function
@@ -3631,7 +3627,7 @@ function UserShellFolder
 	[ValidateSet("Desktop", "Documents", "Downloads", "Music", "Pictures", "Videos")]
 	[string]
 	$UserFolder,
-	
+
 	[Parameter(Mandatory = $true)]
 	[string]
 	$FolderPath
@@ -3653,12 +3649,12 @@ function UserShellFolder
 		[ValidateSet("Desktop", "Documents", "Downloads", "Music", "Pictures", "Videos")]
 		[string]
 		$KnownFolder,
-		
+
 		[Parameter(Mandatory = $true)]
 		[string]
 		$Path
 		)
-		
+
 		$KnownFolders = @{
 			"Desktop"	= @("B4BFCC3A-DB2C-424C-B029-7FE99A87C641");
 			"Documents"	= @("FDD39AD0-238F-46AF-ADB4-6C85480369C7", "f42ee2d3-909f-4907-8871-4c22fc0bf756");
@@ -3667,7 +3663,7 @@ function UserShellFolder
 			"Pictures"	= @("33E28130-4E1E-4676-835A-98395C3BC3BB", "0ddd015d-b06c-45d5-8c4c-f59713854639");
 			"Videos"	= @("18989B1D-99B5-455B-841C-AB7C74E4DDFC", "35286a68-3c57-41a1-bbb1-0eae73d76c95");
 		}
-		
+
 		$Signature = @{
 		Namespace = "WinAPI"
 		Name = "KnownFolders"
@@ -3681,14 +3677,14 @@ public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, Int
 		{
 			Add-Type @Signature
 		}
-		
+
 		foreach ($guid in $KnownFolders[$KnownFolder])
 		{
 			[WinAPI.KnownFolders]::SHSetKnownFolderPath([ref]$guid, 0, 0, $Path)
 		}
 		(Get-Item -Path $Path -Force).Attributes = "ReadOnly"
 	}
-	
+
 	$UserShellFoldersRegName = @{
 		"Desktop"	=	"Desktop"
 		"Documents"	=	"Personal"
@@ -3697,7 +3693,7 @@ public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, Int
 		"Pictures"	=	"My Pictures"
 		"Videos"	=	"My Video"
 	}
-	
+
 	$UserShellFoldersGUID = @{
 		"Desktop"	=	"{754AC886-DF64-4CBA-86B5-F7FBF4FBCEF5}"
 		"Documents"	=	"{F42EE2D3-909F-4907-8871-4C22FC0BF756}"
@@ -3706,7 +3702,7 @@ public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, Int
 		"Pictures"	=	"{0DDD015D-B06C-45D5-8C4C-F59713854639}"
 		"Videos"	=	"{35286A68-3C57-41A1-BBB1-0EAE73D76C95}"
 	}
-	
+
 	# Hidden desktop.ini for each type of user folders
 	$DesktopINI = @{
 		"Desktop"	=	"",
@@ -3741,28 +3737,28 @@ public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, Int
 		"IconResource=%SystemRoot%\system32\imageres.dll,-189",
 		"IconFile=%SystemRoot%\system32\shell32.dll","IconIndex=-238"
 	}
-	
+
 	# Determining the current user folder path
 	$UserShellFolderRegValue = Get-ItemPropertyValue -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" -Name $UserShellFoldersRegName[$UserFolder]
 	if ($UserShellFolderRegValue -ne $FolderPath)
 	{
 		if ((Get-ChildItem -Path $UserShellFolderRegValue | Measure-Object).Count -ne 0)
 		{
-			
-			
+
+
 			Write-Error -Message "Some files left in the $UserShellFolderRegValue folder. Move them manually to a new location" -ErrorAction SilentlyContinue
-			
+
 		}
-		
+
 		# Creating a new folder if there is no one
 		if (-not (Test-Path -Path $FolderPath))
 		{
 			New-Item -Path $FolderPath -ItemType Directory -Force
 		}
-		
+
 		KnownFolderPath -KnownFolder $UserFolder -Path $FolderPath
 		New-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\User Shell Folders" -Name $UserShellFoldersGUID[$UserFolder] -PropertyType ExpandString -Value $FolderPath -Force
-		
+
 		Set-Content -Path "$FolderPath\desktop.ini" -Value $DesktopINI[$UserFolder] -Encoding Unicode -Force
 		(Get-Item -Path "$FolderPath\desktop.ini" -Force).Attributes = "Hidden", "System", "Archive"
 		(Get-Item -Path "$FolderPath\desktop.ini" -Force).Refresh()
@@ -3771,13 +3767,13 @@ public extern static int SHSetKnownFolderPath(ref Guid folderId, uint flags, Int
 
 # Initialize connected Drives, for further tweaking
 function InitDrives{
-	
+
 	# Store all drives letters to use them within ShowMenu function
     if ($global:IsInitialized -eq 0){
 	    Write-Verbose "Retrieving drives..." -Verbose
-	
+
 	    $global:DriveLetters = @((Get-Disk | Where-Object -FilterScript {$_.BusType -ne "USB"} | Get-Partition | Get-Volume | Where-Object -FilterScript {$null -ne $_.DriveLetter}).DriveLetter | Sort-Object)
-	
+
 	    if ($global:DriveLetters.Count -gt 1)
 	    {
 		    # If the number of disks is more than one, set the second drive in the list as default drive
@@ -3802,7 +3798,7 @@ function ChangeDefaultUserLibraryDrive{
 	$Options = "&Change", "&Skip"
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
 	switch ($Result)
 	{
 		"0"
@@ -3816,23 +3812,23 @@ function ChangeDefaultUserLibraryDrive{
 			Write-Verbose -Message "Skipped" -Verbose
 		}
 	}
-	
+
 	# Documents
 	$Title = ""
 	$Message = "To change the location of the Documents folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
 	$Options = "&Change", "&Skip"
-	
+
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
 	switch ($Result)
 	{
 		"0"
 		{
-			
+
 			$Title = "`nSelect the drive where the `"Documents`" folder will be moved to"
-			
+
 			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			UserShellFolder -UserFolder Documents -FolderPath "${SelectedDrive}:\Users\$env:UserName\Documents"
 		}
@@ -3841,16 +3837,16 @@ function ChangeDefaultUserLibraryDrive{
 			Write-Verbose -Message "Skipped" -Verbose
 		}
 	}
-	
+
 	# Downloads
 	$Title = ""
 	$Message = "To change the location of the Downloads folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
 	$Options = "&Change", "&Skip"
-	
+
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
 	switch ($Result)
 	{
 		"0"
@@ -3864,16 +3860,16 @@ function ChangeDefaultUserLibraryDrive{
 			Write-Verbose -Message "Skipped" -Verbose
 		}
 	}
-	
+
 	# Music
 	$Title = ""
 	$Message = "To change the location of the Music folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
 	$Options = "&Change", "&Skip"
-	
+
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
 	switch ($Result)
 	{
 		"0"
@@ -3887,18 +3883,18 @@ function ChangeDefaultUserLibraryDrive{
 			write-Verbose -Message "Skipped" -Verbose
 		}
 	}
-	
-	
+
+
 	# Pictures
 	$Title = ""
-	
+
 	$Message = "To change the location of the Pictures folder enter the required letter"
 	Write-Warning -Message "`nFiles will not be moved"
 	$Options = "&Change", "&Skip"
-	
+
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
 	switch ($Result)
 	{
 		"0"
@@ -3912,7 +3908,7 @@ function ChangeDefaultUserLibraryDrive{
 			Write-Verbose -Message "Skipped" -Verbose
 		}
 	}
-	
+
 	# Videos
 	$Title = ""
 	$Message = "To change the location of the Videos folder enter the required letter"
@@ -3920,7 +3916,7 @@ function ChangeDefaultUserLibraryDrive{
 	$Options = "&Change", "&Skip"
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
 	switch ($Result)
 	{
 		"0"
@@ -3949,7 +3945,7 @@ function ChangeProgramInstallDrive{
 	$Options = "&Change", "&Skip"
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
 	switch ($Result)
 	{
 		"0"
@@ -3959,7 +3955,7 @@ function ChangeProgramInstallDrive{
 			Write-Output "Changing Program Files Folder to $SelectedDrive..."
 			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "ProgramFilesDir" -Type String -Value "${SelectedDrive}:\Program Files"
 			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "ProgramW6432Dir" -Type String -Value "${SelectedDrive}:\Program Files"
-			
+
 			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "CommonFilesDir" -Type String -Value "${SelectedDrive}:\Program Files\Common Files"
 			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "CommonW6432Dir" -Type String -Value "${SelectedDrive}:\Program Files\Common Files"
 		}
@@ -3968,7 +3964,7 @@ function ChangeProgramInstallDrive{
 			Write-Verbose -Message "Skipped" -Verbose
 		}
 	}
-	
+
 	# Program Files(x86)
 	$Title = ""
 	$Message = "To change the location of the Program Files (x86) folder enter the required letter"
@@ -3977,7 +3973,7 @@ function ChangeProgramInstallDrive{
 	$Options = "&Change", "&Skip"
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
 	switch ($Result)
 	{
 		"0"
@@ -3986,7 +3982,7 @@ function ChangeProgramInstallDrive{
 			$SelectedDrive = ShowMenu -Title $Title -Menu $global:DriveLetters -Default $global:Default
 			Write-Output "Changing Program Files Folder to $SelectedDrive..."
 			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "ProgramFilesDir (x86)" -Type String -Value "${SelectedDrive}:\Program Files (x86)"
-			
+
 			Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion" -Name "CommonFilesDir (x86)" -Type String -Value "${SelectedDrive}:\Program Files (x86)\Common Files"
 		}
 		"1"
@@ -4008,7 +4004,7 @@ function ChangeTempFolderDrive{
 	$Options = "&Change", "&Skip"
 	$DefaultChoice = 1
 	$Result = $Host.UI.PromptForChoice($Title, $Message, $Options, $DefaultChoice)
-	
+
 	switch ($Result)
 	{
 		"0"
